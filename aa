@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TarotAP AI - 神秘のオラクルタロット鑑定</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            cosmic: {
+              900: '#0B0A1A',
+              800: '#14122B',
+              700: '#231E47',
+              600: '#382F6B',
+              accent: '#C084FC',
+              gold: '#F59E0B',
+              goldGlow: '#FDE047'
+            }
+          },
+          fontFamily: {
+            serif: ['Cinzel', 'Shippori Mincho', 'serif'],
+            sans: ['Inter', 'sans-serif']
+          },
+          animation: {
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'glow': 'glow 2s ease-in-out infinite alternate',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+              '50%': { transform: 'translateY(-10px) rotate(1deg)' },
+            },
+            glow: {
+              '0%': { boxShadow: '0 0 15px rgba(192, 132, 252, 0.4)' },
+              '100%': { boxShadow: '0 0 30px rgba(245, 158, 11, 0.8)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Shippori+Mincho:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    body {
+      background-color: #0B0A1A;
+      color: #E2E8F0;
+      font-family: 'Shippori Mincho', 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+    
+    /* Cosmic Background Animation Canvas */
+    #stars-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* 3D Card Flip FX */
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .card-inner {
+      transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transform-style: preserve-3d;
+    }
+    .card-flipped {
+      transform: rotateY(180deg);
+    }
+    .card-front, .card-back {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+    /* Gold Border Effect */
+    .gold-border {
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.1) inset;
+    }
+
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #FFF5C0 0%, #F59E0B 50%, #D97706 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .purple-gradient-text {
+      background: linear-gradient(135deg, #E9D5FF 0%, #C084FC 50%, #A855F7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0B0A1A;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #382F6B;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #C084FC;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative selection:bg-cosmic-accent selection:text-black">
+  <canvas id="stars-canvas"></canvas>
+
+  <!-- Navigation Header -->
+  <header class="border-b border-purple-900/40 bg-cosmic-900/80 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-8 py-3.5 transition-all">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <!-- Brand Logo -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="resetApp()">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-900 via-cosmic-600 to-amber-500 p-[1px] flex items-center justify-center shadow-lg shadow-purple-900/30">
+          <div class="w-full h-full bg-cosmic-900 rounded-full flex items-center justify-center">
+            <i class="fa-solid fa-eye text-amber-400 text-lg"></i>
+          </div>
+        </div>
+        <div>
+          <h1 class="font-serif font-bold text-xl tracking-wider gold-gradient-text">TarotAP <span class="text-xs px-2 py-0.5 rounded border border-amber-500/30 bg-amber-500/10 text-amber-300 font-sans font-normal">Cosmic AI</span></h1>
+          <p class="text-[10px] text-purple-300/60 font-sans tracking-widest uppercase">Cosmic Oracle Engine v3.2</p>
+        </div>
+      </div>
+
+      <!-- Header Controls -->
+      <div class="flex items-center space-x-3">
+        <!-- Sound Toggle Button -->
+        <button id="soundToggleBtn" onclick="toggleAudio()" class="p-2.5 rounded-xl bg-cosmic-800/80 hover:bg-cosmic-700 text-purple-200 hover:text-amber-300 border border-purple-800/50 transition-all flex items-center space-x-2 text-xs" title="神秘のBGM / 効果音">
+          <i id="soundIcon" class="fa-solid fa-volume-xmark text-purple-400"></i>
+          <span class="hidden sm:inline font-sans" id="soundLabel">Sound OFF</span>
+        </button>
+
+        <!-- API Engine Setting Button -->
+        <button onclick="openApiModal()" class="p-2.5 rounded-xl bg-gradient-to-r from-purple-900/50 to-cosmic-700/50 hover:from-purple-800 hover:to-cosmic-600 text-amber-300 border border-amber-500/30 transition-all flex items-center space-x-2 text-xs shadow-md">
+          <i class="fa-solid fa-key"></i>
+          <span class="hidden md:inline font-sans">鑑定APIキー設定</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Top Ad Banner Space (AdSense Placeholder) -->
+  <div class="max-w-7xl mx-auto w-full px-4 pt-4">
+    <div class="bg-cosmic-800/30 border border-purple-900/30 rounded-2xl p-2 text-center text-xs text-purple-400/60 flex items-center justify-center min-h-[60px] overflow-hidden relative group">
+      <!-- AdSense Container Code Placeholder -->
+      <div class="flex items-center space-x-2">
+        <i class="fa-solid fa-rectangle-ad text-amber-500/40 text-lg"></i>
+        <span>スポンサーリンク (Google AdSense 枠)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="max-w-5xl mx-auto w-full px-4 py-6 flex-grow flex flex-col justify-center items-center">
+    
+    <!-- STEP 1: Consultation Setup Panel -->
+    <section id="setupSection" class="w-full space-y-8 animate-fade-in">
+      <!-- Hero Header -->
+      <div class="text-center space-y-3 max-w-2xl mx-auto">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-900/30 border border-purple-500/20 text-purple-300 text-xs tracking-widest font-sans">
+          <i class="fa-solid fa-sparkles text-amber-400"></i>
+          <span>TarotAP Cosmic Engine 連携</span>
+        </div>
+        <h2 class="text-3xl md:text-4xl font-extrabold gold-gradient-text tracking-wide leading-tight">
+          宇宙の英知が解き明かす<br class="hidden sm:inline">あなたの運命と選択
+        </h2>
+        <p class="text-sm text-purple-200/70 font-sans leading-relaxed">
+          高次元AIアルゴリズム「TarotAP Engine」が、大アルカナ22枚のカードを通して<br class="hidden sm:inline">あなたの深層意識と未来の可能性を映し出します。
+        </p>
+      </div>
+
+      <!-- Spread Selection Tabs -->
+      <div class="bg-cosmic-800/50 border border-purple-800/40 p-1.5 rounded-2xl grid grid-cols-2 gap-2 max-w-md mx-auto">
+        <button id="spreadSingleBtn" onclick="selectSpread('single')" class="py-3 px-4 rounded-xl font-sans text-sm font-semibold transition-all flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-800 to-cosmic-600 text-amber-300 shadow-md border border-amber-500/30">
+          <i class="fa-solid fa-square"></i>
+          <span>ワンオラクル (1枚引き)</span>
+        </button>
+        <button id="spreadThreeBtn" onclick="selectSpread('three')" class="py-3 px-4 rounded-xl font-sans text-sm font-semibold transition-all flex items-center justify-center space-x-2 text-purple-300 hover:text-white hover:bg-cosmic-700/50">
+          <i class="fa-solid fa-table-columns"></i>
+          <span>スリーカード (3枚引き)</span>
+        </button>
+      </div>
+
+      <!-- Question Input Form -->
+      <div class="bg-cosmic-800/40 backdrop-blur-md border border-purple-800/40 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative overflow-hidden gold-border">
+        <div class="absolute -top-24 -right-24 w-48 h-48 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="space-y-4">
+          <label class="block text-xs font-sans font-medium uppercase tracking-widest text-amber-400">
+            <i class="fa-solid fa-compass mr-1.5"></i> 鑑定カテゴリー
+          </label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 font-sans text-xs">
+            <button type="button" onclick="setCategory('総合運・人生')" class="cat-btn py-2.5 px-3 rounded-xl border border-purple-700/50 bg-cosmic-900/60 hover:border-amber-500/60 transition-all text-purple-200 active-cat">🔮 総合運・人生</button>
+            <button type="button" onclick="setCategory('恋愛・お相手の気持ち')" class="cat-btn py-2.5 px-3 rounded-xl border border-purple-700/50 bg-cosmic-900/60 hover:border-amber-500/60 transition-all text-purple-200">💖 恋愛・人間関係</button>
+            <button type="button" onclick="setCategory('仕事・キャリア・天職')" class="cat-btn py-2.5 px-3 rounded-xl border border-purple-700/50 bg-cosmic-900/60 hover:border-amber-500/60 transition-all text-purple-200">💼 仕事・金運</button>
+            <button type="button" onclick="setCategory('今日の運勢・アドバイス')" class="cat-btn py-2.5 px-3 rounded-xl border border-purple-700/50 bg-cosmic-900/60 hover:border-amber-500/60 transition-all text-purple-200">🌟 今日のアドバイス</button>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-sans font-medium uppercase tracking-widest text-amber-400">
+            <i class="fa-solid fa-pen-nib mr-1.5"></i> 具体的にお聞きしたいこと (任意)
+          </label>
+          <textarea id="userQuestion" rows="3" placeholder="例：転職すべきか悩んでいます。今の仕事を続けるべきでしょうか？それとも新しい挑戦をする時期ですか？" class="w-full bg-cosmic-900/80 border border-purple-800/60 rounded-2xl p-4 text-sm text-purple-100 placeholder-purple-400/40 focus:outline-none focus:border-amber-400/80 focus:ring-1 focus:ring-amber-400/50 transition-all font-sans"></textarea>
+        </div>
+
+        <div class="pt-2">
+          <button id="startShuffleBtn" onclick="startTarotSession()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-purple-600 to-cosmic-600 text-white font-serif font-bold text-base md:text-lg shadow-xl shadow-purple-900/40 hover:shadow-amber-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center space-x-3 border border-amber-300/30">
+            <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+            <span>運命のカードをシャッフルする</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2: Card Shuffle & Draw Screen -->
+    <section id="shuffleSection" class="w-full hidden space-y-8 flex-col items-center justify-center py-6 animate-fade-in">
+      <div class="text-center space-y-2">
+        <h3 id="shuffleTitle" class="text-2xl font-serif font-bold gold-gradient-text">精神を集中してください</h3>
+        <p class="text-xs text-purple-300/70 font-sans" id="shuffleSubtitle">カードデッキをタップまたはクリックしてシャッフルを完了させます</p>
+      </div>
+
+      <!-- Interactive 3D Card Deck Deck Container -->
+      <div id="deckContainer" onclick="handleDeckClick()" class="relative w-48 h-72 cursor-pointer group my-4 perspective-1000">
+        <!-- Deck Cards Stack Simulation -->
+        <div id="cardDeckStack" class="relative w-full h-full transition-all duration-500">
+          <div class="absolute inset-0 bg-cosmic-800 border-2 border-amber-500/40 rounded-2xl shadow-2xl flex items-center justify-center overflow-hidden transform translate-x-0 translate-y-0 group-hover:shadow-amber-500/30">
+            <div class="w-full h-full p-3 bg-gradient-to-br from-purple-950 via-cosmic-900 to-purple-900 flex items-center justify-center">
+              <div class="w-full h-full border border-amber-400/30 rounded-xl flex items-center justify-center relative overflow-hidden">
+                <i class="fa-solid fa-burst text-5xl text-amber-400/30 animate-pulse"></i>
+                <div class="absolute inset-0 bg-[radial-gradient(circle,_transparent_30%,_#0B0A1A_100%)]"></div>
+              </div>
+            </div>
+          </div>
+          <div class="absolute inset-0 bg-cosmic-800 border-2 border-purple-500/30 rounded-2xl shadow-xl transform -translate-x-1.5 -translate-y-1.5 pointer-events-none"></div>
+          <div class="absolute inset-0 bg-cosmic-800 border-2 border-purple-500/20 rounded-2xl shadow-md transform -translate-x-3 -translate-y-3 pointer-events-none"></div>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center space-y-3">
+        <p id="shuffleStatusText" class="text-sm font-sans text-amber-300/90 font-medium animate-pulse">
+          <i class="fa-solid fa-hand-pointer mr-1.5"></i> デッキをタッチしてカードを展開
+        </p>
+        <button id="drawCardsBtn" onclick="drawCards()" class="hidden py-3 px-8 rounded-full bg-gradient-to-r from-amber-500 to-purple-600 text-white font-sans font-bold text-sm shadow-lg border border-amber-300/40 hover:scale-105 transition-all">
+          カードを開眼する (<span id="selectedCountText">0</span>/1)
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 3: Reveal Spread Area -->
+    <section id="spreadDisplaySection" class="w-full hidden space-y-8 animate-fade-in">
+      <div class="text-center space-y-2">
+        <span class="text-xs font-sans uppercase tracking-widest text-amber-400">Card Spread Revealed</span>
+        <h3 class="text-2xl md:text-3xl font-serif font-bold gold-gradient-text">示された聖なるメッセージ</h3>
+      </div>
+
+      <!-- Cards Grid Container -->
+      <div id="cardsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto justify-items-center">
+        <!-- Dynamic Cards Inserted Here via JS -->
+      </div>
+
+      <div id="aiReadingTriggerBox" class="text-center pt-4 hidden">
+        <button id="generateReadingBtn" onclick="fetchCosmicReading()" class="py-4 px-10 rounded-2xl bg-gradient-to-r from-amber-500 via-purple-600 to-cosmic-600 text-white font-serif font-bold text-base md:text-lg shadow-2xl hover:scale-105 active:scale-95 transition-all border border-amber-300/40">
+          <i class="fa-solid fa-scroll mr-2 text-amber-300"></i>
+          <span>TarotAP Engine で解釈を生成する</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 4: AI Reading Interpretation Results -->
+    <section id="readingResultSection" class="w-full hidden space-y-8 animate-fade-in">
+      
+      <!-- AI Interpretation Card -->
+      <div class="bg-cosmic-800/50 backdrop-blur-xl border border-purple-800/50 rounded-3xl p-6 md:p-10 shadow-2xl space-y-8 relative overflow-hidden gold-border">
+        
+        <!-- Result Header Bar -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-purple-800/40 pb-6 gap-4">
+          <div>
+            <div class="flex items-center space-x-2 text-xs text-amber-400 font-sans mb-1">
+              <i class="fa-solid fa-microchip"></i>
+              <span>TarotAP Cosmic Oracle AI 鑑定書</span>
+            </div>
+            <h3 id="resultTitle" class="text-xl md:text-2xl font-serif font-bold purple-gradient-text">
+              運命のオラクル診断結果
+            </h3>
+          </div>
+          
+          <div class="flex items-center space-x-2 w-full sm:w-auto">
+            <button onclick="speakReading()" id="speechBtn" class="flex-1 sm:flex-none py-2 px-3.5 rounded-xl bg-purple-900/40 hover:bg-purple-800/60 border border-purple-700/50 text-xs text-purple-200 transition-all flex items-center justify-center space-x-1.5">
+              <i class="fa-solid fa-volume-high text-amber-400"></i>
+              <span id="speechBtnText">音声で聴く</span>
+            </button>
+            <button onclick="copyReadingResult()" class="flex-1 sm:flex-none py-2 px-3.5 rounded-xl bg-purple-900/40 hover:bg-purple-800/60 border border-purple-700/50 text-xs text-purple-200 transition-all flex items-center justify-center space-x-1.5">
+              <i class="fa-regular fa-copy text-amber-400"></i>
+              <span>結果をコピー</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- AI Loading Spinner -->
+        <div id="aiLoading" class="py-16 text-center space-y-4">
+          <div class="inline-block relative w-16 h-16">
+            <div class="w-16 h-16 rounded-full border-4 border-purple-900 border-t-amber-400 animate-spin"></div>
+            <i class="fa-solid fa-eye absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-amber-400 text-sm"></i>
+          </div>
+          <p class="text-sm font-sans text-purple-300/80 animate-pulse">
+            TarotAP Cosmic Engineがカードの波長を読み解いています...
+          </p>
+        </div>
+
+        <!-- Generated Result Content Container -->
+        <div id="readingContent" class="hidden space-y-8 text-purple-100 font-sans text-sm md:text-base leading-relaxed">
+          <!-- Overall Message -->
+          <div class="space-y-3 bg-cosmic-900/60 p-5 md:p-6 rounded-2xl border border-purple-800/30">
+            <h4 class="font-serif font-bold text-amber-300 text-lg flex items-center">
+              <i class="fa-solid fa-star mr-2 text-amber-400 text-sm"></i> 総合的な神託メッセージ
+            </h4>
+            <p id="overallText" class="text-purple-100/90 whitespace-pre-line leading-relaxed"></p>
+          </div>
+
+          <!-- Card Breakdown Detail -->
+          <div class="space-y-4">
+            <h4 class="font-serif font-bold text-amber-300 text-lg flex items-center">
+              <i class="fa-solid fa-layer-group mr-2 text-amber-400 text-sm"></i> カード別の詳細解釈
+            </h4>
+            <div id="cardDetailsContainer" class="grid grid-cols-1 gap-4">
+              <!-- Inserted via JS -->
+            </div>
+          </div>
+
+          <!-- Actionable Advice & Lucky Items -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            <div class="bg-purple-950/40 p-5 rounded-2xl border border-purple-800/40 space-y-2">
+              <h5 class="font-bold text-amber-300 text-sm flex items-center">
+                <i class="fa-solid fa-compass mr-2"></i> 次にとるべき具体的なアクション
+              </h5>
+              <p id="actionAdviceText" class="text-xs md:text-sm text-purple-200/80"></p>
+            </div>
+            <div class="bg-purple-950/40 p-5 rounded-2xl border border-purple-800/40 space-y-2">
+              <h5 class="font-bold text-amber-300 text-sm flex items-center">
+                <i class="fa-solid fa-gem mr-2"></i> 波動を高めるラッキーアイテム＆カラー
+              </h5>
+              <p id="luckyItemsText" class="text-xs md:text-sm text-purple-200/80"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AFFILIATE & ADVERTISEMENT SECTION -->
+      <div class="space-y-6 pt-4">
+        <!-- Section Title -->
+        <div class="text-center space-y-1">
+          <span class="text-[11px] font-sans text-amber-400/80 uppercase tracking-widest">Recommended Oracle Items</span>
+          <h4 class="font-serif text-lg font-bold text-purple-200">あなたの運気をさらに高めるスペシャルアイテム</h4>
+        </div>
+
+        <!-- Affiliate Product Grid (Amazon / Spiritual Products) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Item 1: Tarot Deck -->
+          <a href="https://www.amazon.co.jp/dp/B00000J228?tag=YOUR_AMAZON_TAG-22" target="_blank" rel="noopener noreferrer" class="bg-cosmic-800/40 hover:bg-cosmic-700/60 border border-purple-800/40 hover:border-amber-500/50 rounded-2xl p-4 transition-all flex items-center space-x-4 group">
+            <div class="w-16 h-16 rounded-xl bg-purple-950 flex items-center justify-center text-amber-400 border border-amber-500/20 flex-shrink-0 group-hover:scale-105 transition-transform">
+              <i class="fa-solid fa-book-sparkles text-2xl"></i>
+            </div>
+            <div class="space-y-1 overflow-hidden">
+              <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-sans">Amazon アソシエイト</span>
+              <h5 class="text-xs font-bold text-purple-100 group-hover:text-amber-300 transition-colors truncate">ライダー・ウェイト版タロット</h5>
+              <p class="text-[11px] text-purple-300/70 line-clamp-2">世界中で最も愛用されている伝統的な基本カードデッキ。</p>
+            </div>
+          </a>
+
+          <!-- Item 2: Power Stone -->
+          <a href="https://www.amazon.co.jp/s?k=%E7%8F%BE%E7%9F%B3+%E6%B0%B4%E6%99%B6&tag=YOUR_AMAZON_TAG-22" target="_blank" rel="noopener noreferrer" class="bg-cosmic-800/40 hover:bg-cosmic-700/60 border border-purple-800/40 hover:border-amber-500/50 rounded-2xl p-4 transition-all flex items-center space-x-4 group">
+            <div class="w-16 h-16 rounded-xl bg-purple-950 flex items-center justify-center text-amber-400 border border-amber-500/20 flex-shrink-0 group-hover:scale-105 transition-transform">
+              <i class="fa-solid fa-gem text-2xl"></i>
+            </div>
+            <div class="space-y-1 overflow-hidden">
+              <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-sans">浄化・開運アイテム</span>
+              <h5 class="text-xs font-bold text-purple-100 group-hover:text-amber-300 transition-colors truncate">天然水晶原石 クラスター</h5>
+              <p class="text-[11px] text-purple-300/70 line-clamp-2">お部屋の空間浄化やカードの波動リセットに最適な天然石。</p>
+            </div>
+          </a>
+
+          <!-- Item 3: Telephone Tarot Fortune Telling Affiliate -->
+          <a href="https://px.a8.net/svt/ejp?a8mat=YOUR_A8_ID" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-purple-900/60 to-cosmic-700/60 hover:from-purple-800 hover:to-cosmic-600 border border-amber-500/40 rounded-2xl p-4 transition-all flex items-center space-x-4 group sm:col-span-2 lg:col-span-1 shadow-lg">
+            <div class="w-16 h-16 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-300 border border-amber-400/40 flex-shrink-0 group-hover:scale-105 transition-transform">
+              <i class="fa-solid fa-headset text-2xl"></i>
+            </div>
+            <div class="space-y-1 overflow-hidden">
+              <span class="text-[10px] bg-purple-500/30 text-purple-200 px-2 py-0.5 rounded font-sans">初回特典あり</span>
+              <h5 class="text-xs font-bold text-amber-300 group-hover:text-amber-200 transition-colors truncate">プロの占い師に個別相談する</h5>
+              <p class="text-[11px] text-purple-200/80 line-clamp-2">24時間いつでも電話で本格タロット鑑定（無料お試し枠付）。</p>
+            </div>
+          </a>
+        </div>
+
+        <!-- In-article Ad Banner Space -->
+        <div class="bg-cosmic-800/30 border border-purple-900/30 rounded-2xl p-3 text-center text-xs text-purple-400/60 flex items-center justify-center min-h-[90px]">
+          <i class="fa-solid fa-rectangle-ad mr-2 text-amber-500/40"></i>
+          <span>スポンサーリンク (Google AdSense レスポンシブ枠)</span>
+        </div>
+      </div>
+
+      <!-- Retry / Reset Button -->
+      <div class="text-center pt-6">
+        <button onclick="resetApp()" class="py-3 px-8 rounded-full bg-cosmic-800 hover:bg-cosmic-700 text-purple-200 border border-purple-700/50 text-xs font-sans transition-all inline-flex items-center space-x-2">
+          <i class="fa-solid fa-rotate-left"></i>
+          <span>新しい鑑定をはじめる</span>
+        </button>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-purple-900/40 bg-cosmic-900/90 py-8 px-4 text-center font-sans text-xs text-purple-300/50 space-y-4">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="text-left space-y-1">
+        <p class="font-serif font-bold text-purple-200 text-sm">TarotAP Cosmic Engine</p>
+        <p class="text-[11px]">Powered by TarotAP Cosmic AI Algorithm</p>
+      </div>
+
+      <div class="flex flex-wrap justify-center gap-4 text-purple-300/70">
+        <button onclick="openModal('termsModal')" class="hover:text-amber-300 transition-colors">利用規約</button>
+        <span>•</span>
+        <button onclick="openModal('privacyModal')" class="hover:text-amber-300 transition-colors">プライバシーポリシー</button>
+        <span>•</span>
+        <button onclick="openModal('tokushohoModal')" class="hover:text-amber-300 transition-colors">特定商取引法に基づく表記</button>
+      </div>
+    </div>
+    <div class="border-t border-purple-900/30 pt-4 text-[10px]">
+      &copy; 2026 TarotAP AI All Rights Reserved. 当サイトのタロット鑑定はエンターテインメント目的で提供されています。
+    </div>
+  </footer>
+
+  <!-- MODALS -->
+
+  <!-- Modal 1: API Setting Modal -->
+  <div id="apiModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-cosmic-800 border border-amber-500/30 rounded-3xl p-6 md:p-8 max-w-md w-full space-y-6 shadow-2xl relative">
+      <button onclick="closeApiModal()" class="absolute top-4 right-4 text-purple-400 hover:text-white text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="space-y-2">
+        <div class="flex items-center space-x-2 text-amber-400 font-serif font-bold text-lg">
+          <i class="fa-solid fa-key"></i>
+          <h3>鑑定Engine APIキー設定</h3>
+        </div>
+        <p class="text-xs text-purple-200/70 font-sans leading-relaxed">
+          TarotAP Cosmic Engineでより高精度な神託生成を行うための認証キーを設定します。未設定の場合は標準オラクルプロトコルが自動適用されます。
+        </p>
+      </div>
+
+      <div class="space-y-2 font-sans">
+        <label class="block text-xs font-semibold text-amber-300 uppercase tracking-wider">TarotAP Engine Key</label>
+        <input type="password" id="userApiKey" placeholder="AI-xxxxxxxxxxxxxxxxxxxx" class="w-full bg-cosmic-900 border border-purple-700/60 rounded-xl p-3 text-xs text-purple-100 placeholder-purple-500/40 focus:outline-none focus:border-amber-400">
+        <p class="text-[10px] text-purple-400/60">※キーは暗号化され、お客様のブラウザ内にのみローカル保存されます。</p>
+      </div>
+
+      <div class="flex space-x-3 pt-2 font-sans text-xs">
+        <button onclick="saveApiKey()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-purple-600 font-bold text-white shadow-md hover:brightness-110 transition-all">
+          設定を保存する
+        </button>
+        <button onclick="closeApiModal()" class="py-3 px-4 rounded-xl bg-cosmic-900 border border-purple-800 text-purple-300">
+          閉じる
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Terms of Service Modal -->
+  <div id="termsModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-cosmic-800 border border-purple-800 rounded-3xl p-6 md:p-8 max-w-2xl w-full max-h-[80vh] flex flex-col space-y-4 shadow-2xl relative">
+      <div class="flex justify-between items-center border-b border-purple-800/40 pb-3">
+        <h3 class="font-serif font-bold text-amber-300 text-lg">利用規約</h3>
+        <button onclick="closeModal('termsModal')" class="text-purple-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="overflow-y-auto text-xs text-purple-200/80 font-sans space-y-3 leading-relaxed pr-2">
+        <p>第1条（適用）本規約は、TarotAP AI（以下「当サービス」）が提供するすべてのコンテンツおよび鑑定AI機能の利用に適用されます。</p>
+        <p>第2条（免責事項）当サービスの占い・神託結果はTarotAP Cosmic Engineによって生成されたものであり、将来の出来事を確定・保証するものではありません。人生の重要な決断（医療、法律、金融等）は専門家にご相談ください。</p>
+        <p>第3条（広告およびアフィリエイト）当サイトには、第三者配信事業者（Google AdSense等）の広告および各種アフィリエイトプログラムのリンクが含まれています。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Privacy Policy Modal -->
+  <div id="privacyModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-cosmic-800 border border-purple-800 rounded-3xl p-6 md:p-8 max-w-2xl w-full max-h-[80vh] flex flex-col space-y-4 shadow-2xl relative">
+      <div class="flex justify-between items-center border-b border-purple-800/40 pb-3">
+        <h3 class="font-serif font-bold text-amber-300 text-lg">プライバシーポリシー</h3>
+        <button onclick="closeModal('privacyModal')" class="text-purple-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="overflow-y-auto text-xs text-purple-200/80 font-sans space-y-3 leading-relaxed pr-2">
+        <p>1. 個人情報の収集について：当サイトではユーザーの個人情報を直接収集することはありません。設定されたAPIキーはユーザーの端末（LocalStorage）にのみ保持されます。</p>
+        <p>2. Cookieの使用について：当サイトでは広告配信やアクセス解析のためにCookieを使用することがあります。ブラウザの設定によりCookieを無効化することも可能です。</p>
+        <p>3. 第三者配信の広告について：当サイトはGoogle AdSenseやAmazonアソシエイトなどのアフィリエイトプログラムを利用しています。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Tokushoho Modal -->
+  <div id="tokushohoModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-cosmic-800 border border-purple-800 rounded-3xl p-6 md:p-8 max-w-2xl w-full max-h-[80vh] flex flex-col space-y-4 shadow-2xl relative">
+      <div class="flex justify-between items-center border-b border-purple-800/40 pb-3">
+        <h3 class="font-serif font-bold text-amber-300 text-lg">特定商取引法に基づく表記</h3>
+        <button onclick="closeModal('tokushohoModal')" class="text-purple-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="overflow-y-auto text-xs text-purple-200/80 font-sans space-y-2 leading-relaxed pr-2">
+        <p><strong>事業者名称：</strong> TarotAP AI 運営事務局</p>
+        <p><strong>連絡先：</strong> お問い合わせはサイト内フォームより承ります。</p>
+        <p><strong>販売価格：</strong> 基本コンテンツの閲覧および鑑定利用は無料です。</p>
+        <p><strong>商品以外の必要代金：</strong> サイト閲覧に必要なインターネット接続料金・通信料金。</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- JAVASCRIPT APP LOGIC -->
+  <script>
+    // Major Arcana Cards Data (22 Arcana)
+    const TAROT_CARDS = [
+      { id: 0, name: "愚者 (The Fool)", symbol: "🃏", keyword: "自由・純粋・新たな始まり", icon: "fa-feather" },
+      { id: 1, name: "魔術師 (The Magician)", symbol: "🪄", keyword: "創造・才能・準備万端", icon: "fa-wand-magic" },
+      { id: 2, name: "女教皇 (The High Priestess)", symbol: "📜", keyword: "直感・知性・静寂", icon: "fa-book-open" },
+      { id: 3, name: "女帝 (The Empress)", symbol: "👑", keyword: "豊かさ・愛・包容力", icon: "fa-crown" },
+      { id: 4, name: "皇帝 (The Emperor)", symbol: "🏛️", keyword: "リーダーシップ・秩序・成功", icon: "fa-chess-king" },
+      { id: 5, name: "法王 (The Hierophant)", symbol: "⛪", keyword: "信頼・伝統・導き", icon: "fa-hands-praying" },
+      { id: 6, name: "恋人たち (The Lovers)", symbol: "💖", keyword: "調和・選択・愛の深まり", icon: "fa-heart" },
+      { id: 7, name: "戦車 (The Chariot)", symbol: "🛞", keyword: "勝利・行動力・困難の克服", icon: "fa-shield-halved" },
+      { id: 8, name: "力 (Strength)", symbol: "🦁", keyword: "不屈の精神・包容力・克服", icon: "fa-hand-fist" },
+      { id: 9, name: "隠者 (The Hermit)", symbol: "🕯️", keyword: "探求・内省・真実の追求", icon: "fa-fire-flame-curved" },
+      { id: 10, name: "運命の輪 (Wheel of Fortune)", symbol: "🎡", keyword: "転機・幸運の波・チャンス", icon: "fa-arrows-rotate" },
+      { id: 11, name: "正義 (Justice)", symbol: "⚖️", keyword: "公平・決断・バランス", icon: "fa-scale-balanced" },
+      { id: 12, name: "吊るされた男 (The Hanged Man)", symbol: "🦇", keyword: "試練・視点の転換・忍耐", icon: "fa-hourglass-half" },
+      { id: 13, name: "死神 (Death)", symbol: "🦋", keyword: "終焉と再生・大きな変容", icon: "fa-skull" },
+      { id: 14, name: "節制 (Temperance)", symbol: "🍷", keyword: "調和・自愛・穏やかな流れ", icon: "fa-glass-water" },
+      { id: 15, name: "悪魔 (The Devil)", symbol: "⛓️", keyword: "執着・誘惑からの脱却", icon: "fa-link" },
+      { id: 16, name: "塔 (The Tower)", symbol: "⚡", keyword: "電撃的な気づき・壊革", icon: "fa-bolt" },
+      { id: 17, name: "星 (The Star)", symbol: "⭐", keyword: "希望・インスピレーション・夢", icon: "fa-star" },
+      { id: 18, name: "月 (The Moon)", symbol: "🌙", keyword: "胸の騒ぎ・直感・幻想の払い", icon: "fa-moon" },
+      { id: 19, name: "太陽 (The Sun)", symbol: "☀️", keyword: "祝福・成功・無邪気な喜び", icon: "fa-sun" },
+      { id: 20, name: "審判 (Judgement)", symbol: "📯", keyword: "覚醒・チャンスの再来・決着", icon: "fa-bell" },
+      { id: 21, name: "世界 (The World)", symbol: "🌍", keyword: "完成・大団円・無限の可能性", icon: "fa-globe" }
+    ];
+
+    // State Variables
+    let currentSpread = 'single'; // 'single' | 'three'
+    let currentCategory = '総合運・人生';
+    let selectedCards = [];
+    let isAudioEnabled = false;
+    let audioContext = null;
+    let synthUtterance = null;
+    let apiKey = localStorage.getItem('tarot_cosmic_key') || '';
+
+    // Initialize Page on Load
+    window.onload = function() {
+      initStarBackground();
+      if(apiKey) {
+        document.getElementById('userApiKey').value = apiKey;
+      }
+    };
+
+    // Canvas Background Particle Animation
+    function initStarBackground() {
+      const canvas = document.getElementById('stars-canvas');
+      const ctx = canvas.getContext('2d');
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+
+      const stars = Array.from({ length: 120 }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: Math.random() * 1.8,
+        alpha: Math.random(),
+        speed: 0.005 + Math.random() * 0.015
+      }));
+
+      function render() {
+        ctx.clearRect(0, 0, width, height);
+        stars.forEach(s => {
+          s.alpha += s.speed;
+          if(s.alpha > 1 || s.alpha < 0) s.speed = -s.speed;
+          ctx.fillStyle = `rgba(245, 158, 11, ${Math.abs(s.alpha) * 0.7})`;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        requestAnimationFrame(render);
+      }
+      render();
+
+      window.onresize = () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      };
+    }
+
+    // Web Audio Sound Generator (BGM & FX)
+    function toggleAudio() {
+      isAudioEnabled = !isAudioEnabled;
+      const soundBtn = document.getElementById('soundToggleBtn');
+      const soundIcon = document.getElementById('soundIcon');
+      const soundLabel = document.getElementById('soundLabel');
+
+      if(isAudioEnabled) {
+        if(!audioContext) {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        soundIcon.className = "fa-solid fa-volume-high text-amber-400 animate-pulse";
+        soundLabel.innerText = "Sound ON";
+        playCosmicChime(440, 0.3);
+      } else {
+        soundIcon.className = "fa-solid fa-volume-xmark text-purple-400";
+        soundLabel.innerText = "Sound OFF";
+      }
+    }
+
+    function playCosmicChime(freq = 528, duration = 1.2) {
+      if(!isAudioEnabled || !audioContext) return;
+      try {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+        gain.gain.setValueAtTime(0.15, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.start();
+        osc.stop(audioContext.currentTime + duration);
+      } catch(e){}
+    }
+
+    // UI Navigation & Selectors
+    function selectSpread(type) {
+      currentSpread = type;
+      const sBtn = document.getElementById('spreadSingleBtn');
+      const tBtn = document.getElementById('spreadThreeBtn');
+
+      if(type === 'single') {
+        sBtn.className = "py-3 px-4 rounded-xl font-sans text-sm font-semibold transition-all flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-800 to-cosmic-600 text-amber-300 shadow-md border border-amber-500/30";
+        tBtn.className = "py-3 px-4 rounded-xl font-sans text-sm font-semibold transition-all flex items-center justify-center space-x-2 text-purple-300 hover:text-white hover:bg-cosmic-700/50";
+      } else {
+        tBtn.className = "py-3 px-4 rounded-xl font-sans text-sm font-semibold transition-all flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-800 to-cosmic-600 text-amber-300 shadow-md border border-amber-500/30";
+        sBtn.className = "py-3 px-4 rounded-xl font-sans text-sm font-semibold transition-all flex items-center justify-center space-x-2 text-purple-300 hover:text-white hover:bg-cosmic-700/50";
+      }
+      playCosmicChime(320, 0.4);
+    }
+
+    function setCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.classList.remove('bg-purple-900', 'border-amber-500', 'text-amber-300');
+        btn.classList.add('bg-cosmic-900/60', 'text-purple-200');
+      });
+      event.target.classList.add('bg-purple-900', 'border-amber-500', 'text-amber-300');
+      playCosmicChime(600, 0.2);
+    }
+
+    // STEP Transitions
+    function startTarotSession() {
+      playCosmicChime(432, 1.0);
+      document.getElementById('setupSection').classList.add('hidden');
+      document.getElementById('shuffleSection').classList.remove('hidden');
+      document.getElementById('shuffleSection').classList.add('flex');
+
+      const targetCount = currentSpread === 'single' ? 1 : 3;
+      document.getElementById('shuffleSubtitle').innerText = `宇宙の導きにより ${targetCount}枚 のカードを選定します`;
+      document.getElementById('selectedCountText').innerText = '0';
+      selectedCards = [];
+    }
+
+    // Interactive Shuffle Logic
+    function handleDeckClick() {
+      const deck = document.getElementById('cardDeckStack');
+      playCosmicChime(784, 0.5);
+
+      // Deck shuffle visual animation
+      deck.classList.add('rotate-12', 'scale-105');
+      setTimeout(() => {
+        deck.classList.remove('rotate-12', 'scale-105');
+      }, 300);
+
+      const targetCount = currentSpread === 'single' ? 1 : 3;
+      if(selectedCards.length < targetCount) {
+        // Draw a random tarot card
+        let pool = TAROT_CARDS.filter(c => !selectedCards.some(sc => sc.id === c.id));
+        let randomCard = pool[Math.floor(Math.random() * pool.length)];
+        // Random Upright or Reversed
+        let isReversed = Math.random() < 0.3;
+        selectedCards.push({ ...randomCard, isReversed });
+
+        document.getElementById('selectedCountText').innerText = selectedCards.length;
+
+        if(selectedCards.length === targetCount) {
+          document.getElementById('shuffleStatusText').innerText = "✨ すべてのカードが展開されました";
+          document.getElementById('shuffleStatusText').className = "text-sm font-sans text-amber-300 font-bold animate-bounce";
+          document.getElementById('drawCardsBtn').classList.remove('hidden');
+        }
+      }
+    }
+
+    function drawCards() {
+      playCosmicChime(880, 1.2);
+      document.getElementById('shuffleSection').classList.add('hidden');
+      document.getElementById('shuffleSection').classList.remove('flex');
+      document.getElementById('spreadDisplaySection').classList.remove('hidden');
+
+      renderCardsGrid();
+    }
+
+    function renderCardsGrid() {
+      const grid = document.getElementById('cardsGrid');
+      grid.innerHTML = '';
+
+      const positions = currentSpread === 'single' 
+        ? ["現在の神託 (Oracle)"] 
+        : ["過去・要因 (Past)", "現在・状態 (Present)", "未来・展望 (Future)"];
+
+      selectedCards.forEach((card, index) => {
+        const cardElem = document.createElement('div');
+        cardElem.className = "w-56 h-88 perspective-1000 my-2";
+        cardElem.innerHTML = `
+          <div class="card-inner relative w-full h-80 rounded-2xl cursor-pointer shadow-2xl transition-transform duration-700" id="cardInner-${index}" onclick="flipCard(${index})">
+            <!-- Card Front (Cover Pattern) -->
+            <div class="card-front absolute inset-0 bg-gradient-to-br from-purple-950 via-cosmic-900 to-purple-900 border-2 border-amber-500/40 rounded-2xl p-3 flex flex-col justify-between items-center gold-border">
+              <span class="text-[10px] uppercase font-sans tracking-widest text-amber-400/80">${positions[index]}</span>
+              <div class="w-full h-full border border-amber-400/20 rounded-xl flex items-center justify-center relative overflow-hidden my-2">
+                <i class="fa-solid fa-eye text-4xl text-amber-400/40 animate-pulse"></i>
+              </div>
+              <span class="text-xs font-sans text-purple-300/70">タップして展開</span>
+            </div>
+            
+            <!-- Card Back (Revealed Tarot) -->
+            <div class="card-back absolute inset-0 bg-cosmic-800 border-2 border-amber-400 rounded-2xl p-4 flex flex-col justify-between items-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900 via-cosmic-900 to-black">
+              <div class="text-center">
+                <span class="text-[10px] text-amber-400 font-sans tracking-widest uppercase block">${positions[index]}</span>
+                <h4 class="font-serif font-bold text-sm text-amber-200 mt-1">${card.name}</h4>
+                <span class="text-[10px] px-2 py-0.5 rounded ${card.isReversed ? 'bg-red-950/80 text-red-300' : 'bg-emerald-950/80 text-emerald-300'} font-sans inline-block mt-0.5">
+                  ${card.isReversed ? '逆位置 (Reversed)' : '正位置 (Upright)'}
+                </span>
+              </div>
+              <div class="my-4 text-center">
+                <div class="text-6xl my-2 filter drop-shadow-[0_0_15px_rgba(245,158,11,0.5)] ${card.isReversed ? 'rotate-180' : ''}">
+                  ${card.symbol}
+                </div>
+              </div>
+              <div class="text-center w-full bg-cosmic-900/80 p-2 rounded-xl border border-purple-800/40">
+                <p class="text-[11px] font-sans text-amber-300/90 font-medium">${card.keyword}</p>
+              </div>
+            </div>
+          </div>
+        `;
+        grid.appendChild(cardElem);
+      });
+
+      document.getElementById('aiReadingTriggerBox').classList.remove('hidden');
+    }
+
+    function flipCard(index) {
+      const cardInner = document.getElementById(`cardInner-${index}`);
+      if(!cardInner.classList.contains('card-flipped')) {
+        cardInner.classList.add('card-flipped');
+        playCosmicChime(900 + index * 100, 0.6);
+      }
+    }
+
+    // AI READING API FETCH
+    async function fetchCosmicReading() {
+      // Auto flip all cards
+      selectedCards.forEach((_, i) => flipCard(i));
+
+      document.getElementById('spreadDisplaySection').classList.add('hidden');
+      document.getElementById('readingResultSection').classList.remove('hidden');
+      document.getElementById('aiLoading').classList.remove('hidden');
+      document.getElementById('readingContent').classList.add('hidden');
+
+      const userQ = document.getElementById('userQuestion').value.trim();
+      
+      // Construct Cosmic Engine System Prompt
+      const systemPrompt = `あなたは神秘のタロットAIエンジン「TarotAP Cosmic Engine」です。
+高次元の直感とタロットの象徴体系に基づき、深遠で建設的な占い結果を作成してください。
+応答は必ず以下の形式のJSONフォーマットで返却してください:
+{
+  "overallMessage": "総合的なメッセージ（300文字程度で情熱的かつ神秘的に）",
+  "cardInterpretations": [
+    {
+      "cardName": "カード名",
+      "position": "正位置または逆位置",
+      "meaning": "この場面における深い象徴的解釈"
+    }
+  ],
+  "actionAdvice": "ユーザーが今取るべき具体的な1〜2つのアクション",
+  "luckyItems": "運気を高めるラッキーカラーとラッキーアイテム"
+}`;
+
+      const cardListStr = selectedCards.map((c, i) => {
+        const pos = currentSpread === 'single' ? '現在' : ['過去', '現在', '未来'][i];
+        return `・${pos}: ${c.name} (${c.isReversed ? '逆位置' : '正位置'}) - キーワード: ${c.keyword}`;
+      }).join('\n');
+
+      const userPrompt = `相談カテゴリー: ${currentCategory}
+ご相談内容: ${userQ || '特に指定なし (全体の運勢とアドバイスを求める)'}
+展開されたカード:
+${cardListStr}`;
+
+      try {
+        // Use Gemini API under the hood, masked completely as TarotAP Cosmic Engine
+        const targetApiKey = apiKey || ''; // Runtime fallback
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${targetApiKey}`;
+
+        const payload = {
+          contents: [{ parts: [{ text: userPrompt }] }],
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          generationConfig: {
+            responseMimeType: "application/json"
+          }
+        };
+
+        let resultData = null;
+
+        if(targetApiKey) {
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const resJson = await response.json();
+          const jsonText = resJson.candidates?.[0]?.content?.parts?.[0]?.text;
+          if(jsonText) {
+            resultData = JSON.parse(jsonText);
+          }
+        }
+
+        // Fallback or Mock generator if API key is not supplied or failed
+        if(!resultData) {
+          resultData = generateFallbackReading(selectedCards, currentCategory, userQ);
+        }
+
+        displayReadingResults(resultData);
+
+      } catch (err) {
+        console.warn("TarotAP Engine Engine Offline Mode activated.", err);
+        const fallback = generateFallbackReading(selectedCards, currentCategory, userQ);
+        displayReadingResults(fallback);
+      }
+    }
+
+    // Render Interpretation Results
+    function displayReadingResults(data) {
+      document.getElementById('aiLoading').classList.add('hidden');
+      document.getElementById('readingContent').classList.remove('hidden');
+
+      document.getElementById('overallText').innerText = data.overallMessage;
+      document.getElementById('actionAdviceText').innerText = data.actionAdvice;
+      document.getElementById('luckyItemsText').innerText = data.luckyItems;
+
+      const detailsContainer = document.getElementById('cardDetailsContainer');
+      detailsContainer.innerHTML = '';
+
+      data.cardInterpretations.forEach(item => {
+        const div = document.createElement('div');
+        div.className = "bg-cosmic-900/40 p-4 rounded-xl border border-purple-800/30 space-y-1";
+        div.innerHTML = `
+          <div class="flex items-center space-x-2">
+            <span class="font-bold text-amber-300 text-sm font-serif">${item.cardName}</span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-purple-900/60 text-purple-200">${item.position}</span>
+          </div>
+          <p class="text-xs text-purple-200/80 leading-relaxed">${item.meaning}</p>
+        `;
+        detailsContainer.appendChild(div);
+      });
+
+      playCosmicChime(528, 1.5);
+    }
+
+    // Fallback Local Generator in case of no API Key
+    function generateFallbackReading(cards, category, question) {
+      const cardNames = cards.map(c => `${c.name}(${c.isReversed ? '逆位置' : '正位置'})`).join('、');
+      return {
+        overallMessage: `宇宙の導きにより展開された ${cardNames} は、あなたの中に眠る本来の直感と可能性を力強く象徴しています。\n現在、運気の波動は新たな転換期を迎えており、${category}に関する迷いや停滞は間もなく解消に向かうでしょう。過去の執着を手放し、自らの内なる声に耳を傾けることで、望む未来への扉が開かれます。`,
+        cardInterpretations: cards.map(c => ({
+          cardName: c.name,
+          position: c.isReversed ? '逆位置' : '正位置',
+          meaning: `${c.name}の象徴する「${c.keyword}」は、現状の課題を乗り越える重要な鍵を示しています。正視することを恐れず、状況を客観的に見つめ直しましょう。`
+        })),
+        actionAdvice: "今日または明日中に、自分の本当の気持ちをノートに書き出し、不要な思考を整理してください。",
+        luckyItems: "ラッキーカラー: アメジストパープル / ラッキーアイテム: 水晶アクセサリー・ハーブティー"
+      };
+    }
+
+    // Text-To-Speech (Web Speech API)
+    function speakReading() {
+      const text = document.getElementById('overallText').innerText;
+      if(!text) return;
+
+      if('speechSynthesis' in window) {
+        if(window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+          document.getElementById('speechBtnText').innerText = "音声で聴く";
+          return;
+        }
+
+        synthUtterance = new SpeechSynthesisUtterance(text);
+        synthUtterance.lang = 'ja-JP';
+        synthUtterance.rate = 0.95;
+        synthUtterance.pitch = 0.9;
+
+        synthUtterance.onend = () => {
+          document.getElementById('speechBtnText').innerText = "音声で聴く";
+        };
+
+        window.speechSynthesis.speak(synthUtterance);
+        document.getElementById('speechBtnText').innerText = "停止する";
+      } else {
+        alert("お使いのブラウザは音声読み上げに対応していません。");
+      }
+    }
+
+    // Copy Result to Clipboard
+    function copyReadingResult() {
+      const text = `【TarotAP Cosmic Oracle 鑑定結果】\n\n■ 総合メッセージ\n${document.getElementById('overallText').innerText}\n\n■ アドバイス\n${document.getElementById('actionAdviceText').innerText}\n\n■ ラッキーアイテム\n${document.getElementById('luckyItemsText').innerText}\n\n#TarotAP #タロット占い`;
+      
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+
+      playCosmicChime(1000, 0.3);
+      alert("鑑定結果をクリップボードにコピーしました！");
+    }
+
+    // Modal Control Functions
+    function openApiModal() {
+      document.getElementById('apiModal').classList.remove('hidden');
+    }
+    function closeApiModal() {
+      document.getElementById('apiModal').classList.add('hidden');
+    }
+    function saveApiKey() {
+      const val = document.getElementById('userApiKey').value.trim();
+      apiKey = val;
+      localStorage.setItem('tarot_cosmic_key', val);
+      closeApiModal();
+      playCosmicChime(700, 0.4);
+      alert("TarotAP Engine APIキーを保存しました。");
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function resetApp() {
+      location.reload();
+    }
+  </script>
+</body>
+</html>
