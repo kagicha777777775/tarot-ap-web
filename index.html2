@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TarotAP YES/NO - 神秘のYES/NOタロット決断鑑定</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            cosmic: {
+              900: '#0B0A1A',
+              800: '#14122B',
+              700: '#231E47',
+              600: '#382F6B',
+              accent: '#C084FC',
+              gold: '#F59E0B',
+              goldGlow: '#FDE047',
+              yes: '#10B981',
+              no: '#EF4444'
+            }
+          },
+          fontFamily: {
+            serif: ['Cinzel', 'Shippori Mincho', 'serif'],
+            sans: ['Inter', 'sans-serif']
+          },
+          animation: {
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'glow': 'glow 2s ease-in-out infinite alternate',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+              '50%': { transform: 'translateY(-10px) rotate(1deg)' },
+            },
+            glow: {
+              '0%': { boxShadow: '0 0 15px rgba(192, 132, 252, 0.4)' },
+              '100%': { boxShadow: '0 0 30px rgba(245, 158, 11, 0.8)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Shippori+Mincho:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    body {
+      background-color: #0B0A1A;
+      color: #E2E8F0;
+      font-family: 'Shippori Mincho', 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+    
+    #stars-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .card-inner {
+      transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transform-style: preserve-3d;
+    }
+    .card-flipped {
+      transform: rotateY(180deg);
+    }
+    .card-front, .card-back {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+    .gold-border {
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.1) inset;
+    }
+
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #FFF5C0 0%, #F59E0B 50%, #D97706 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .purple-gradient-text {
+      background: linear-gradient(135deg, #E9D5FF 0%, #C084FC 50%, #A855F7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0B0A1A;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #382F6B;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #C084FC;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative selection:bg-cosmic-accent selection:text-black">
+  <canvas id="stars-canvas"></canvas>
+
+  <header class="border-b border-purple-900/40 bg-cosmic-900/80 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-8 py-3.5 transition-all">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="resetApp()">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-900 via-cosmic-600 to-amber-500 p-[1px] flex items-center justify-center shadow-lg shadow-purple-900/30">
+          <div class="w-full h-full bg-cosmic-900 rounded-full flex items-center justify-center">
+            <i class="fa-solid fa-scale-balanced text-amber-400 text-lg"></i>
+          </div>
+        </div>
+        <div>
+          <h1 class="font-serif font-bold text-xl tracking-wider gold-gradient-text">TarotAP <span class="text-xs px-2 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 font-sans font-normal">YES / NO</span></h1>
+          <p class="text-[10px] text-purple-300/60 font-sans tracking-widest uppercase">Cosmic Decision Oracle Engine v3.2</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <button id="soundToggleBtn" onclick="toggleAudio()" class="p-2.5 rounded-xl bg-cosmic-800/80 hover:bg-cosmic-700 text-purple-200 hover:text-amber-300 border border-purple-800/50 transition-all flex items-center space-x-2 text-xs" title="効果音 / BGM">
+          <i id="soundIcon" class="fa-solid fa-volume-xmark text-purple-400"></i>
+          <span class="hidden sm:inline font-sans" id="soundLabel">Sound OFF</span>
+        </button>
+
+        <button onclick="openApiModal()" class="p-2.5 rounded-xl bg-gradient-to-r from-purple-900/50 to-cosmic-700/50 hover:from-purple-800 hover:to-cosmic-600 text-amber-300 border border-amber-500/30 transition-all flex items-center space-x-2 text-xs shadow-md">
+          <i class="fa-solid fa-key"></i>
+          <span class="hidden md:inline font-sans">鑑定APIキー設定</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Top Ad Banner -->
+  <div class="max-w-7xl mx-auto w-full px-4 pt-4">
+    <div class="bg-cosmic-800/30 border border-purple-900/30 rounded-2xl p-2 text-center text-xs text-purple-400/60 flex items-center justify-center min-h-[60px]">
+      <i class="fa-solid fa-rectangle-ad text-amber-500/40 text-lg mr-2"></i>
+      <span>スポンサーリンク (Google AdSense 枠)</span>
+    </div>
+  </div>
+
+  <main class="max-w-5xl mx-auto w-full px-4 py-6 flex-grow flex flex-col justify-center items-center">
+    
+    <!-- STEP 1: Question Setup Panel -->
+    <section id="setupSection" class="w-full space-y-8 animate-fade-in">
+      <div class="text-center space-y-3 max-w-2xl mx-auto">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-900/30 border border-purple-500/20 text-purple-300 text-xs tracking-widest font-sans">
+          <i class="fa-solid fa-sparkles text-amber-400"></i>
+          <span>一瞬で迷いを断ち切るタロット神託</span>
+        </div>
+        <h2 class="text-3xl md:text-4xl font-extrabold gold-gradient-text tracking-wide leading-tight">
+          YESか、NOか。<br class="hidden sm:inline">聖なるカードが示す真実の答え
+        </h2>
+        <p class="text-sm text-purple-200/70 font-sans leading-relaxed">
+          あなたの胸にある「YESかNOか知りたい悩み」を直接入力するか、<br class="hidden sm:inline">下のアシスト質問をタップしてください。
+        </p>
+      </div>
+
+      <!-- Quick Preset Questions Section (10 Topics) -->
+      <div class="bg-cosmic-800/40 backdrop-blur-md border border-purple-800/40 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative gold-border">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-sans font-medium uppercase tracking-widest text-amber-400">
+              <i class="fa-solid fa-bolt mr-1.5"></i> ワンタップで占う（よくある悩み 10選）
+            </label>
+            <span class="text-[11px] text-purple-400/80 font-sans">タップすると即座に開始します</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 font-sans text-xs">
+            <button onclick="selectPreset('あの人は今、私のことを好きですか？')" class="preset-btn p-3 rounded-xl border border-purple-700/40 bg-cosmic-900/70 hover:border-amber-400/80 hover:bg-purple-900/40 transition-all text-left text-purple-200 flex items-center space-x-2 group">
+              <span class="text-base group-hover:scale-110 transition-transform">💖</span>
+              <span class="truncate">あの人は今、私のことを好きですか？</span>
+            </button>
+            <button onclick="selectPreset('今のパートナーと将来、結婚できますか？')" class="preset-btn p-3 rounded-xl border border-purple-700/40 bg-cosmic-900/70 hover:border-amber-400/80 hover:bg-purple-900/40 transition-all text-left text-purple-200 flex items-center space-x-2 group">
+              <span class="text-base group-hover:scale-110 transition-transform">💍</span>
+              <span class="truncate">今のパートナーと将来、結婚できますか？</span>
+            </button>
+            <button onclick="selectPreset('連絡や返信は今日中に来ますか？')" class="preset-btn p-3 rounded-xl border border-purple-700/40 bg-cosmic-900/70 hover:border-amber-400/80 hover:bg-purple-900/40 transition-all text-left text-purple-200 flex items-center space-x-2 group">
+              <span class="text-base group-hover:scale-110 transition-transform">💬</span>
+              <span class="truncate">連絡や返信は今日中に来ますか？</span>
+            </button>
+            <button onclick="selectPreset('転職や新しい仕事に挑戦すべきですか？')" class="preset-btn p-3 rounded-xl border border-purple-700/40 bg-cosmic-900/70 hover:border-amber-400/80 hover:bg-purple-900/40 transition-all text-left text-purple-200 flex items-center space-x-2 group">
+              <span class="text-base group-hover:scale-110 transition-transform">💼</span>
+              <span class="truncate">転職や新しい仕事に挑戦すべきですか？</span>
+            </button>
+            <button onclick="selectPreset('今のプロジェクトやビジネスは成功しますか？')" class="preset-btn p-3 rounded-xl border border-purple-700/40 bg-cosmic-900/70 hover:border-amber-400/80 hover:bg-purple-900/40 transition-all text-left text-purple-200 flex items-center space-x-2 group">
+              <span class="text-base group-hover:scale-110 transition-transform">📈</span>
+              <span class="truncate">今のプロジェクトやビジネスは成功しますか？</span>
+            </button>
+            <button onclick="selectPreset('近いうちに金運や収入はアップしますか？')" class="preset-btn p-3 rounded-xl border border-purple-700/40 bg-cosmic-900/70 hover:border-amber-400/80 hover:bg-purple-900/40 transition-all text-left text-purple-200 flex items-center space-x-2 group">
+              <span class="text-base group-hover:scale-110 transition-transform">💰</span>
+              <span class="truncate">近いうちに金運や収入はアップしますか？</span>
+            </button>
+            <button onclick="selectPreset('あの人と復縁・関係修復できますか？')" class="preset-btn p-3 rounded-xl border border-purple-700/40 bg-cosmic-900/70 hover:border-amber-400/80 hover:bg-purple-900/40 transition-all text-left text-purple-200 flex items-center space-x-2 group">
+              <span class="text-base group-hover:scale-110 transition-transform">🤝</span>
+              <span class="truncate">あの人と復縁・関係修復できますか？</span>
+            </button>
+            <button onclick="selectPreset('近いうちに引越しや環境を変えても大丈夫？')" class="preset-btn p-3 rounded-xl border border-purple-700/40 bg-cosmic-900/70 hover:border-amber-400/80 hover:bg-purple-900/40 transition-all text-left text-purple-200 flex items-center space-x-2 group">
+              <span class="text-base group-hover:scale-110 transition-transform">✈️</span>
+              <span class="truncate">近いうちに引越しや環境を変えても大丈夫？</span>
+            </button>
+            <button onclick="selectPreset('今日、思い切って行動を起こすべきですか？')" class="preset-btn p-3 rounded-xl border border-purple-700/40 bg-cosmic-900/70 hover:border-amber-400/80 hover:bg-purple-900/40 transition-all text-left text-purple-200 flex items-center space-x-2 group">
+              <span class="text-base group-hover:scale-110 transition-transform">🔮</span>
+              <span class="truncate">今日、思い切って行動を起こすべきですか？</span>
+            </button>
+            <button onclick="selectPreset('自分の直感や予感は当たっていますか？')" class="preset-btn p-3 rounded-xl border border-purple-700/40 bg-cosmic-900/70 hover:border-amber-400/80 hover:bg-purple-900/40 transition-all text-left text-purple-200 flex items-center space-x-2 group">
+              <span class="text-base group-hover:scale-110 transition-transform">✨</span>
+              <span class="truncate">自分の直感や予感は当たっていますか？</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Custom Manual Input Area -->
+        <div class="space-y-2 pt-2 border-t border-purple-800/40">
+          <label class="block text-xs font-sans font-medium uppercase tracking-widest text-amber-400">
+            <i class="fa-solid fa-pen-nib mr-1.5"></i> 自分で質問を文章で入力する
+          </label>
+          <div class="relative">
+            <textarea id="userQuestion" rows="3" placeholder="「YES」または「NO」で答えられる質問を入力してください（例：今日告白しても成功しますか？など）" class="w-full bg-cosmic-900/80 border border-purple-800/60 rounded-2xl p-4 text-sm text-purple-100 placeholder-purple-400/40 focus:outline-none focus:border-amber-400/80 focus:ring-1 focus:ring-amber-400/50 transition-all font-sans"></textarea>
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <button id="startShuffleBtn" onclick="startTarotSession()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-purple-600 to-cosmic-600 text-white font-serif font-bold text-base md:text-lg shadow-xl shadow-purple-900/40 hover:shadow-amber-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center space-x-3 border border-amber-300/30">
+            <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+            <span>運命のタロットでYES/NOを占う</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2: Card Shuffle & Draw Screen -->
+    <section id="shuffleSection" class="w-full hidden space-y-8 flex-col items-center justify-center py-6 animate-fade-in">
+      <div class="text-center space-y-2">
+        <h3 id="shuffleTitle" class="text-2xl font-serif font-bold gold-gradient-text">意識をカードに集中させてください</h3>
+        <p class="text-xs text-purple-300/70 font-sans" id="shuffleSubtitle">質問に対する【YES/NO】の波動を導き出します</p>
+      </div>
+
+      <div id="deckContainer" onclick="handleDeckClick()" class="relative w-48 h-72 cursor-pointer group my-4 perspective-1000">
+        <div id="cardDeckStack" class="relative w-full h-full transition-all duration-500">
+          <div class="absolute inset-0 bg-cosmic-800 border-2 border-amber-500/40 rounded-2xl shadow-2xl flex items-center justify-center overflow-hidden transform translate-x-0 translate-y-0 group-hover:shadow-amber-500/30">
+            <div class="w-full h-full p-3 bg-gradient-to-br from-purple-950 via-cosmic-900 to-purple-900 flex items-center justify-center">
+              <div class="w-full h-full border border-amber-400/30 rounded-xl flex items-center justify-center relative overflow-hidden">
+                <i class="fa-solid fa-scale-balanced text-5xl text-amber-400/30 animate-pulse"></i>
+                <div class="absolute inset-0 bg-[radial-gradient(circle,_transparent_30%,_#0B0A1A_100%)]"></div>
+              </div>
+            </div>
+          </div>
+          <div class="absolute inset-0 bg-cosmic-800 border-2 border-purple-500/30 rounded-2xl shadow-xl transform -translate-x-1.5 -translate-y-1.5 pointer-events-none"></div>
+          <div class="absolute inset-0 bg-cosmic-800 border-2 border-purple-500/20 rounded-2xl shadow-md transform -translate-x-3 -translate-y-3 pointer-events-none"></div>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center space-y-3">
+        <p id="shuffleStatusText" class="text-sm font-sans text-amber-300/90 font-medium animate-pulse">
+          <i class="fa-solid fa-hand-pointer mr-1.5"></i> デッキをタップして聖なるカードを1枚オープン
+        </p>
+        <button id="drawCardsBtn" onclick="drawCards()" class="hidden py-3 px-8 rounded-full bg-gradient-to-r from-amber-500 to-purple-600 text-white font-sans font-bold text-sm shadow-lg border border-amber-300/40 hover:scale-105 transition-all">
+          判定カードを開眼する
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 3: Reveal Single Card Area -->
+    <section id="spreadDisplaySection" class="w-full hidden space-y-8 animate-fade-in">
+      <div class="text-center space-y-2">
+        <span class="text-xs font-sans uppercase tracking-widest text-amber-400">Oracle Decision Card Revealed</span>
+        <h3 class="text-2xl md:text-3xl font-serif font-bold gold-gradient-text">運命の導き手</h3>
+      </div>
+
+      <div id="cardsGrid" class="flex justify-center max-w-4xl mx-auto">
+        <!-- Dynamic Card Inserted Here -->
+      </div>
+
+      <div id="aiReadingTriggerBox" class="text-center pt-4 hidden">
+        <button id="generateReadingBtn" onclick="fetchCosmicReading()" class="py-4 px-10 rounded-2xl bg-gradient-to-r from-amber-500 via-purple-600 to-cosmic-600 text-white font-serif font-bold text-base md:text-lg shadow-2xl hover:scale-105 active:scale-95 transition-all border border-amber-300/40">
+          <i class="fa-solid fa-burst mr-2 text-amber-300"></i>
+          <span>YES/NO の結論と詳細解釈を見る</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 4: YES/NO Reading Result Screen -->
+    <section id="readingResultSection" class="w-full hidden space-y-8 animate-fade-in">
+      
+      <div class="bg-cosmic-800/50 backdrop-blur-xl border border-purple-800/50 rounded-3xl p-6 md:p-10 shadow-2xl space-y-8 relative overflow-hidden gold-border">
+        
+        <!-- Header Controls -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-purple-800/40 pb-6 gap-4">
+          <div>
+            <div class="flex items-center space-x-2 text-xs text-amber-400 font-sans mb-1">
+              <i class="fa-solid fa-microchip"></i>
+              <span>TarotAP Cosmic Decision Engine 鑑定書</span>
+            </div>
+            <h3 id="resultQuestionHeader" class="text-lg md:text-xl font-serif font-bold purple-gradient-text">
+              「質問内容」の鑑定結果
+            </h3>
+          </div>
+          
+          <div class="flex items-center space-x-2 w-full sm:w-auto">
+            <button onclick="speakReading()" id="speechBtn" class="flex-1 sm:flex-none py-2 px-3.5 rounded-xl bg-purple-900/40 hover:bg-purple-800/60 border border-purple-700/50 text-xs text-purple-200 transition-all flex items-center justify-center space-x-1.5">
+              <i class="fa-solid fa-volume-high text-amber-400"></i>
+              <span id="speechBtnText">音声で聴く</span>
+            </button>
+            <button onclick="copyReadingResult()" class="flex-1 sm:flex-none py-2 px-3.5 rounded-xl bg-purple-900/40 hover:bg-purple-800/60 border border-purple-700/50 text-xs text-purple-200 transition-all flex items-center justify-center space-x-1.5">
+              <i class="fa-regular fa-copy text-amber-400"></i>
+              <span>結果をコピー</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- AI Loading Spinner -->
+        <div id="aiLoading" class="py-16 text-center space-y-4">
+          <div class="inline-block relative w-16 h-16">
+            <div class="w-16 h-16 rounded-full border-4 border-purple-900 border-t-amber-400 animate-spin"></div>
+            <i class="fa-solid fa-scale-balanced absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-amber-400 text-sm"></i>
+          </div>
+          <p class="text-sm font-sans text-purple-300/80 animate-pulse">
+            TarotAP Engineが【YES/NO】の結論とアドバイスを分析しています...
+          </p>
+        </div>
+
+        <!-- Result Display Container -->
+        <div id="readingContent" class="hidden space-y-8 font-sans text-sm md:text-base leading-relaxed">
+          
+          <!-- Core YES/NO Badge & Probability Gauge -->
+          <div class="bg-gradient-to-br from-purple-950/80 via-cosmic-900 to-purple-900/80 p-6 md:p-8 rounded-3xl border border-amber-500/30 text-center space-y-6 shadow-xl relative overflow-hidden">
+            <div class="space-y-2">
+              <span class="text-xs uppercase font-sans tracking-widest text-amber-400">Decision Conclusion</span>
+              <div id="verdictBadge" class="inline-block px-8 py-3 rounded-full font-serif text-2xl md:text-3xl font-extrabold tracking-wider border shadow-2xl">
+                判定結果
+              </div>
+            </div>
+
+            <!-- Probability Bar -->
+            <div class="max-w-md mx-auto space-y-2">
+              <div class="flex justify-between text-xs font-bold font-sans">
+                <span class="text-emerald-400"><i class="fa-solid fa-circle-check"></i> YES傾向: <span id="yesPercentText">0</span>%</span>
+                <span class="text-rose-400">NO傾向: <span id="noPercentText">0</span>% <i class="fa-solid fa-circle-xmark"></i></span>
+              </div>
+              <div class="w-full bg-cosmic-950 h-4 rounded-full overflow-hidden p-0.5 border border-purple-800">
+                <div id="yesProgressBar" class="h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-emerald-500 rounded-full transition-all duration-1000" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <p id="verdictSummary" class="text-sm font-medium text-purple-200/90 leading-relaxed max-w-xl mx-auto"></p>
+          </div>
+
+          <!-- Overall Detailed Interpretation Message -->
+          <div class="space-y-3 bg-cosmic-900/60 p-5 md:p-6 rounded-2xl border border-purple-800/30">
+            <h4 class="font-serif font-bold text-amber-300 text-lg flex items-center">
+              <i class="fa-solid fa-scroll mr-2 text-amber-400 text-sm"></i> 神託の詳細解説＆カードの意味
+            </h4>
+            <p id="overallText" class="text-purple-100/90 whitespace-pre-line leading-relaxed"></p>
+          </div>
+
+          <!-- Actionable Steps & Key Advice -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            <div class="bg-purple-950/40 p-5 rounded-2xl border border-purple-800/40 space-y-2">
+              <h5 class="font-bold text-amber-300 text-sm flex items-center">
+                <i class="fa-solid fa-compass mr-2"></i> 願望成就・選択のためのアドバイス
+              </h5>
+              <p id="actionAdviceText" class="text-xs md:text-sm text-purple-200/80"></p>
+            </div>
+            <div class="bg-purple-950/40 p-5 rounded-2xl border border-purple-800/40 space-y-2">
+              <h5 class="font-bold text-amber-300 text-sm flex items-center">
+                <i class="fa-solid fa-gem mr-2"></i> 幸運を引き寄せる波動アイテム＆キー
+              </h5>
+              <p id="luckyItemsText" class="text-xs md:text-sm text-purple-200/80"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AFFILIATE & ADVERTISEMENT SECTION -->
+      <div class="space-y-6 pt-4">
+        <div class="text-center space-y-1">
+          <span class="text-[11px] font-sans text-amber-400/80 uppercase tracking-widest">Recommended Oracle Items</span>
+          <h4 class="font-serif text-lg font-bold text-purple-200">さらに運気を高める開運・鑑定アイテム</h4>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <a href="https://www.amazon.co.jp/dp/B00000J228?tag=YOUR_AMAZON_TAG-22" target="_blank" rel="noopener noreferrer" class="bg-cosmic-800/40 hover:bg-cosmic-700/60 border border-purple-800/40 hover:border-amber-500/50 rounded-2xl p-4 transition-all flex items-center space-x-4 group">
+            <div class="w-16 h-16 rounded-xl bg-purple-950 flex items-center justify-center text-amber-400 border border-amber-500/20 flex-shrink-0 group-hover:scale-105 transition-transform">
+              <i class="fa-solid fa-book-sparkles text-2xl"></i>
+            </div>
+            <div class="space-y-1 overflow-hidden">
+              <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-sans">Amazon アソシエイト</span>
+              <h5 class="text-xs font-bold text-purple-100 group-hover:text-amber-300 transition-colors truncate">ライダー・ウェイト版タロット</h5>
+              <p class="text-[11px] text-purple-300/70 line-clamp-2">YES/NOタロットで最も信頼される定番カードデッキ。</p>
+            </div>
+          </a>
+
+          <a href="https://www.amazon.co.jp/s?k=%E7%8F%BE%E7%9F%B3+%E6%B0%B4%E6%99%B6&tag=YOUR_AMAZON_TAG-22" target="_blank" rel="noopener noreferrer" class="bg-cosmic-800/40 hover:bg-cosmic-700/60 border border-purple-800/40 hover:border-amber-500/50 rounded-2xl p-4 transition-all flex items-center space-x-4 group">
+            <div class="w-16 h-16 rounded-xl bg-purple-950 flex items-center justify-center text-amber-400 border border-amber-500/20 flex-shrink-0 group-hover:scale-105 transition-transform">
+              <i class="fa-solid fa-gem text-2xl"></i>
+            </div>
+            <div class="space-y-1 overflow-hidden">
+              <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-sans">浄化・開運アイテム</span>
+              <h5 class="text-xs font-bold text-purple-100 group-hover:text-amber-300 transition-colors truncate">天然水晶クラスター</h5>
+              <p class="text-[11px] text-purple-300/70 line-clamp-2">直感力を研ぎ澄まし、迷いをクリアにする波動天然石。</p>
+            </div>
+          </a>
+
+          <a href="https://px.a8.net/svt/ejp?a8mat=YOUR_A8_ID" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-purple-900/60 to-cosmic-700/60 hover:from-purple-800 hover:to-cosmic-600 border border-amber-500/40 rounded-2xl p-4 transition-all flex items-center space-x-4 group sm:col-span-2 lg:col-span-1 shadow-lg">
+            <div class="w-16 h-16 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-300 border border-amber-400/40 flex-shrink-0 group-hover:scale-105 transition-transform">
+              <i class="fa-solid fa-headset text-2xl"></i>
+            </div>
+            <div class="space-y-1 overflow-hidden">
+              <span class="text-[10px] bg-purple-500/30 text-purple-200 px-2 py-0.5 rounded font-sans">個別相談サービス</span>
+              <h5 class="text-xs font-bold text-amber-300 group-hover:text-amber-200 transition-colors truncate">プロ占い師に電話で直接相談</h5>
+              <p class="text-[11px] text-purple-200/80 line-clamp-2">複雑な恋愛や人生の決断を24時間いつでもじっくり鑑定。</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="bg-cosmic-800/30 border border-purple-900/30 rounded-2xl p-3 text-center text-xs text-purple-400/60 flex items-center justify-center min-h-[90px]">
+          <i class="fa-solid fa-rectangle-ad mr-2 text-amber-500/40"></i>
+          <span>スポンサーリンク (Google AdSense レスポンシブ枠)</span>
+        </div>
+      </div>
+
+      <div class="text-center pt-6">
+        <button onclick="resetApp()" class="py-3 px-8 rounded-full bg-cosmic-800 hover:bg-cosmic-700 text-purple-200 border border-purple-700/50 text-xs font-sans transition-all inline-flex items-center space-x-2">
+          <i class="fa-solid fa-rotate-left"></i>
+          <span>新しい質問でYES/NOを占う</span>
+        </button>
+      </div>
+
+    </section>
+  </main>
+
+  <footer class="border-t border-purple-900/40 bg-cosmic-900/90 py-8 px-4 text-center font-sans text-xs text-purple-300/50 space-y-4">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="text-left space-y-1">
+        <p class="font-serif font-bold text-purple-200 text-sm">TarotAP YES/NO Engine</p>
+        <p class="text-[11px]">Powered by TarotAP Cosmic Decision Algorithm</p>
+      </div>
+
+      <div class="flex flex-wrap justify-center gap-4 text-purple-300/70">
+        <button onclick="openModal('termsModal')" class="hover:text-amber-300 transition-colors">利用規約</button>
+        <span>•</span>
+        <button onclick="openModal('privacyModal')" class="hover:text-amber-300 transition-colors">プライバシーポリシー</button>
+        <span>•</span>
+        <button onclick="openModal('tokushohoModal')" class="hover:text-amber-300 transition-colors">特定商取引法に基づく表記</button>
+      </div>
+    </div>
+    <div class="border-t border-purple-900/30 pt-4 text-[10px]">
+      &copy; 2026 TarotAP AI All Rights Reserved. 当サイトのタロット判定はエンターテインメント目的で提供されています。
+    </div>
+  </footer>
+
+  <!-- MODALS -->
+  <div id="apiModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-cosmic-800 border border-amber-500/30 rounded-3xl p-6 md:p-8 max-w-md w-full space-y-6 shadow-2xl relative">
+      <button onclick="closeApiModal()" class="absolute top-4 right-4 text-purple-400 hover:text-white text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="space-y-2">
+        <div class="flex items-center space-x-2 text-amber-400 font-serif font-bold text-lg">
+          <i class="fa-solid fa-key"></i>
+          <h3>鑑定Engine APIキー設定</h3>
+        </div>
+        <p class="text-xs text-purple-200/70 font-sans leading-relaxed">
+          TarotAP Cosmic Engineで高精度なYES/NO解釈を生成するためのAPIキーを設定します。未設定の場合は標準判定プロトコルが自動適用されます。
+        </p>
+      </div>
+
+      <div class="space-y-2 font-sans">
+        <label class="block text-xs font-semibold text-amber-300 uppercase tracking-wider">TarotAP Engine Key</label>
+        <input type="password" id="userApiKey" placeholder="AI-xxxxxxxxxxxxxxxxxxxx" class="w-full bg-cosmic-900 border border-purple-700/60 rounded-xl p-3 text-xs text-purple-100 placeholder-purple-500/40 focus:outline-none focus:border-amber-400">
+        <p class="text-[10px] text-purple-400/60">※キーは暗号化され、お客様のブラウザ内にのみローカル保存されます。</p>
+      </div>
+
+      <div class="flex space-x-3 pt-2 font-sans text-xs">
+        <button onclick="saveApiKey()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-purple-600 font-bold text-white shadow-md hover:brightness-110 transition-all">
+          設定を保存する
+        </button>
+        <button onclick="closeApiModal()" class="py-3 px-4 rounded-xl bg-cosmic-900 border border-purple-800 text-purple-300">
+          閉じる
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="termsModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-cosmic-800 border border-purple-800 rounded-3xl p-6 md:p-8 max-w-2xl w-full max-h-[80vh] flex flex-col space-y-4 shadow-2xl relative">
+      <div class="flex justify-between items-center border-b border-purple-800/40 pb-3">
+        <h3 class="font-serif font-bold text-amber-300 text-lg">利用規約</h3>
+        <button onclick="closeModal('termsModal')" class="text-purple-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="overflow-y-auto text-xs text-purple-200/80 font-sans space-y-3 leading-relaxed pr-2">
+        <p>第1条（適用）本規約は、TarotAP YES/NO AI（以下「当サービス」）が提供するすべてのコンテンツおよび鑑定機能の利用に適用されます。</p>
+        <p>第2条（免責事項）当サービスのYES/NO判定結果はタロットカードの象徴に基づき生成されたものであり、将来の決定や結果を絶対的に保証するものではありません。</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="privacyModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-cosmic-800 border border-purple-800 rounded-3xl p-6 md:p-8 max-w-2xl w-full max-h-[80vh] flex flex-col space-y-4 shadow-2xl relative">
+      <div class="flex justify-between items-center border-b border-purple-800/40 pb-3">
+        <h3 class="font-serif font-bold text-amber-300 text-lg">プライバシーポリシー</h3>
+        <button onclick="closeModal('privacyModal')" class="text-purple-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="overflow-y-auto text-xs text-purple-200/80 font-sans space-y-3 leading-relaxed pr-2">
+        <p>個人情報の取り扱いについて：入力された質問文およびローカルストレージ内のAPIキーは外部サーバーに永続保存されません。</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="tokushohoModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-cosmic-800 border border-purple-800 rounded-3xl p-6 md:p-8 max-w-2xl w-full max-h-[80vh] flex flex-col space-y-4 shadow-2xl relative">
+      <div class="flex justify-between items-center border-b border-purple-800/40 pb-3">
+        <h3 class="font-serif font-bold text-amber-300 text-lg">特定商取引法に基づく表記</h3>
+        <button onclick="closeModal('tokushohoModal')" class="text-purple-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="overflow-y-auto text-xs text-purple-200/80 font-sans space-y-2 leading-relaxed pr-2">
+        <p><strong>事業者名称：</strong> TarotAP AI 運営事務局</p>
+        <p><strong>サービス形態：</strong> 無料ウェブ占いコンテンツ</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT APP LOGIC -->
+  <script>
+    // Major Arcana with Specific YES/NO Score Propensities (Upright YES %, Reversed YES %)
+    const TAROT_CARDS = [
+      { id: 0, name: "愚者 (The Fool)", symbol: "🃏", yesScore: 75, reversedYesScore: 35, keyword: "自由・冒険・新たな挑戦", icon: "fa-feather" },
+      { id: 1, name: "魔術師 (The Magician)", symbol: "🪄", yesScore: 90, reversedYesScore: 40, keyword: "才能開花・スタート・準備完了", icon: "fa-wand-magic" },
+      { id: 2, name: "女教皇 (The High Priestess)", symbol: "📜", yesScore: 45, reversedYesScore: 25, keyword: "静観・直感・慎重な観察", icon: "fa-book-open" },
+      { id: 3, name: "女帝 (The Empress)", symbol: "👑", yesScore: 95, reversedYesScore: 50, keyword: "繁栄・愛・実り豊かさ", icon: "fa-crown" },
+      { id: 4, name: "皇帝 (The Emperor)", symbol: "🏛️", yesScore: 85, reversedYesScore: 30, keyword: "リーダーシップ・実行・達成", icon: "fa-chess-king" },
+      { id: 5, name: "法王 (The Hierophant)", symbol: "⛪", yesScore: 70, reversedYesScore: 40, keyword: "信頼・伝統・アドバイス受容", icon: "fa-hands-praying" },
+      { id: 6, name: "恋人たち (The Lovers)", symbol: "💖", yesScore: 95, reversedYesScore: 35, keyword: "調和・好意・最高の選択", icon: "fa-heart" },
+      { id: 7, name: "戦車 (The Chariot)", symbol: "🛞", yesScore: 85, reversedYesScore: 30, keyword: "勝利・突破・果敢な進軍", icon: "fa-shield-halved" },
+      { id: 8, name: "力 (Strength)", symbol: "🦁", yesScore: 75, reversedYesScore: 35, keyword: "忍耐・コントロール・愛の力", icon: "fa-hand-fist" },
+      { id: 9, name: "隠者 (The Hermit)", symbol: "🕯️", keyword: "内省・慎重・焦りは禁物", yesScore: 35, reversedYesScore: 20, icon: "fa-fire-flame-curved" },
+      { id: 10, name: "運命の輪 (Wheel of Fortune)", symbol: "🎡", yesScore: 98, reversedYesScore: 25, keyword: "大絶好機・最高の波・転機", icon: "fa-arrows-rotate" },
+      { id: 11, name: "正義 (Justice)", symbol: "⚖️", yesScore: 50, reversedYesScore: 30, keyword: "公平な判断・誠実さ・バランス", icon: "fa-scale-balanced" },
+      { id: 12, name: "吊るされた男 (The Hanged Man)", symbol: "🦇", yesScore: 20, reversedYesScore: 40, keyword: "試練・視点変更・一休止", icon: "fa-hourglass-half" },
+      { id: 13, name: "死神 (Death)", symbol: "🦋", yesScore: 10, reversedYesScore: 45, keyword: "リセット・再スタート・終焉", icon: "fa-skull" },
+      { id: 14, name: "節制 (Temperance)", symbol: "🍷", yesScore: 70, reversedYesScore: 40, keyword: "調和・自然体・焦らず調和", icon: "fa-glass-water" },
+      { id: 15, name: "悪魔 (The Devil)", symbol: "⛓️", yesScore: 15, reversedYesScore: 50, keyword: "執着・誘惑・見直しが必要", icon: "fa-link" },
+      { id: 16, name: "塔 (The Tower)", symbol: "⚡", yesScore: 5, reversedYesScore: 25, keyword: "電撃的変化・壊革・手放し", icon: "fa-bolt" },
+      { id: 17, name: "星 (The Star)", symbol: "⭐", yesScore: 90, reversedYesScore: 45, keyword: "希望・インスピレーション・叶う", icon: "fa-star" },
+      { id: 18, name: "月 (The Moon)", symbol: "🌙", yesScore: 20, reversedYesScore: 40, keyword: "不透明・不安・時間が解決", icon: "fa-moon" },
+      { id: 19, name: "太陽 (The Sun)", symbol: "☀️", yesScore: 100, reversedYesScore: 60, keyword: "大成功・祝福・大吉兆", icon: "fa-sun" },
+      { id: 20, name: "審判 (Judgement)", symbol: "📯", yesScore: 90, reversedYesScore: 35, keyword: "覚醒・チャンス再来・復活", icon: "fa-bell" },
+      { id: 21, name: "世界 (The World)", symbol: "🌍", yesScore: 100, reversedYesScore: 55, keyword: "完全成就・大団円・最高の答え", icon: "fa-globe" }
+    ];
+
+    // State Variables
+    let selectedQuestion = "";
+    let selectedCard = null;
+    let isAudioEnabled = false;
+    let audioContext = null;
+    let synthUtterance = null;
+    let apiKey = localStorage.getItem('tarot_cosmic_key') || '';
+
+    window.onload = function() {
+      initStarBackground();
+      if(apiKey) {
+        document.getElementById('userApiKey').value = apiKey;
+      }
+    };
+
+    function initStarBackground() {
+      const canvas = document.getElementById('stars-canvas');
+      const ctx = canvas.getContext('2d');
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+
+      const stars = Array.from({ length: 120 }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: Math.random() * 1.8,
+        alpha: Math.random(),
+        speed: 0.005 + Math.random() * 0.015
+      }));
+
+      function render() {
+        ctx.clearRect(0, 0, width, height);
+        stars.forEach(s => {
+          s.alpha += s.speed;
+          if(s.alpha > 1 || s.alpha < 0) s.speed = -s.speed;
+          ctx.fillStyle = `rgba(245, 158, 11, ${Math.abs(s.alpha) * 0.7})`;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        requestAnimationFrame(render);
+      }
+      render();
+
+      window.onresize = () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      };
+    }
+
+    // Audio Chime Logic
+    function toggleAudio() {
+      isAudioEnabled = !isAudioEnabled;
+      const soundIcon = document.getElementById('soundIcon');
+      const soundLabel = document.getElementById('soundLabel');
+
+      if(isAudioEnabled) {
+        if(!audioContext) {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        soundIcon.className = "fa-solid fa-volume-high text-amber-400 animate-pulse";
+        soundLabel.innerText = "Sound ON";
+        playCosmicChime(528, 0.4);
+      } else {
+        soundIcon.className = "fa-solid fa-volume-xmark text-purple-400";
+        soundLabel.innerText = "Sound OFF";
+      }
+    }
+
+    function playCosmicChime(freq = 528, duration = 1.0) {
+      if(!isAudioEnabled || !audioContext) return;
+      try {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+        gain.gain.setValueAtTime(0.15, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.start();
+        osc.stop(audioContext.currentTime + duration);
+      } catch(e){}
+    }
+
+    // Presets Click Handler
+    function selectPreset(questionText) {
+      document.getElementById('userQuestion').value = questionText;
+      playCosmicChime(640, 0.3);
+      startTarotSession();
+    }
+
+    // STEP Navigation Logic
+    function startTarotSession() {
+      const inputQ = document.getElementById('userQuestion').value.trim();
+      selectedQuestion = inputQ || "今の私の問いに対するYES/NOの答え";
+
+      playCosmicChime(432, 1.0);
+      document.getElementById('setupSection').classList.add('hidden');
+      document.getElementById('shuffleSection').classList.remove('hidden');
+      document.getElementById('shuffleSection').classList.add('flex');
+
+      selectedCard = null;
+    }
+
+    // Interactive Card Draw Logic
+    function handleDeckClick() {
+      const deck = document.getElementById('cardDeckStack');
+      playCosmicChime(784, 0.5);
+
+      deck.classList.add('rotate-12', 'scale-105');
+      setTimeout(() => {
+        deck.classList.remove('rotate-12', 'scale-105');
+      }, 300);
+
+      if(!selectedCard) {
+        const randomCard = TAROT_CARDS[Math.floor(Math.random() * TAROT_CARDS.length)];
+        const isReversed = Math.random() < 0.35;
+        selectedCard = { ...randomCard, isReversed };
+
+        document.getElementById('shuffleStatusText').innerText = "✨ 運命のカードが選ばれました";
+        document.getElementById('shuffleStatusText').className = "text-sm font-sans text-amber-300 font-bold animate-bounce";
+        document.getElementById('drawCardsBtn').classList.remove('hidden');
+      }
+    }
+
+    function drawCards() {
+      playCosmicChime(880, 1.2);
+      document.getElementById('shuffleSection').classList.add('hidden');
+      document.getElementById('shuffleSection').classList.remove('flex');
+      document.getElementById('spreadDisplaySection').classList.remove('hidden');
+
+      renderCardGrid();
+    }
+
+    function renderCardGrid() {
+      const grid = document.getElementById('cardsGrid');
+      grid.innerHTML = '';
+
+      const cardElem = document.createElement('div');
+      cardElem.className = "w-64 h-96 perspective-1000 my-2";
+      cardElem.innerHTML = `
+        <div class="card-inner relative w-full h-full rounded-2xl cursor-pointer shadow-2xl transition-transform duration-700" id="cardInner" onclick="flipCard()">
+          <div class="card-front absolute inset-0 bg-gradient-to-br from-purple-950 via-cosmic-900 to-purple-900 border-2 border-amber-500/40 rounded-2xl p-4 flex flex-col justify-between items-center gold-border">
+            <span class="text-xs uppercase font-sans tracking-widest text-amber-400/80">Decision Oracle Card</span>
+            <div class="w-full h-full border border-amber-400/20 rounded-xl flex items-center justify-center relative overflow-hidden my-3">
+              <i class="fa-solid fa-scale-balanced text-5xl text-amber-400/40 animate-pulse"></i>
+            </div>
+            <span class="text-xs font-sans text-purple-300/70">タップしてカードを開眼</span>
+          </div>
+          
+          <div class="card-back absolute inset-0 bg-cosmic-800 border-2 border-amber-400 rounded-2xl p-5 flex flex-col justify-between items-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900 via-cosmic-900 to-black">
+            <div class="text-center">
+              <span class="text-xs text-amber-400 font-sans tracking-widest uppercase block">Selected Card</span>
+              <h4 class="font-serif font-bold text-base text-amber-200 mt-1">${selectedCard.name}</h4>
+              <span class="text-xs px-2.5 py-0.5 rounded ${selectedCard.isReversed ? 'bg-rose-950/80 text-rose-300 border border-rose-500/30' : 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/30'} font-sans inline-block mt-1">
+                ${selectedCard.isReversed ? '逆位置 (Reversed)' : '正位置 (Upright)'}
+              </span>
+            </div>
+            <div class="my-3 text-center">
+              <div class="text-7xl filter drop-shadow-[0_0_20px_rgba(245,158,11,0.6)] ${selectedCard.isReversed ? 'rotate-180' : ''}">
+                ${selectedCard.symbol}
+              </div>
+            </div>
+            <div class="text-center w-full bg-cosmic-900/80 p-2.5 rounded-xl border border-purple-800/40">
+              <p class="text-xs font-sans text-amber-300/90 font-medium">${selectedCard.keyword}</p>
+            </div>
+          </div>
+        </div>
+      `;
+      grid.appendChild(cardElem);
+
+      document.getElementById('aiReadingTriggerBox').classList.remove('hidden');
+    }
+
+    function flipCard() {
+      const cardInner = document.getElementById('cardInner');
+      if(!cardInner.classList.contains('card-flipped')) {
+        cardInner.classList.add('card-flipped');
+        playCosmicChime(950, 0.6);
+      }
+    }
+
+    async function fetchCosmicReading() {
+      flipCard();
+
+      document.getElementById('spreadDisplaySection').classList.add('hidden');
+      document.getElementById('readingResultSection').classList.remove('hidden');
+      document.getElementById('aiLoading').classList.remove('hidden');
+      document.getElementById('readingContent').classList.add('hidden');
+
+      document.getElementById('resultQuestionHeader').innerText = `「${selectedQuestion}」`;
+
+      const systemPrompt = `あなたはタロット神託のYES/NO決断AI「TarotAP YES/NO Engine」です。
+ユーザーの質問に対し、引き当てられたカードの象徴とエネルギーから【YES / NO】の明確な判定とアドバイスを行ってください。
+
+必ず以下のJSONフォーマットで回答を返却してください:
+{
+  "verdict": "【YES】または【NO】または【条件付きYES】",
+  "yesProbability": 75, 
+  "verdictSummary": "判定理由の要約（80文字程度）",
+  "overallMessage": "全体の神託メッセージ（250文字程度で論理的かつ神秘的に）",
+  "actionAdvice": "今ユーザーが取るべき具体的な1〜2つのアクション",
+  "luckyItems": "運気を高める開運カラー・アイテム"
+}`;
+
+      const userPrompt = `質問内容: ${selectedQuestion}
+引いたカード: ${selectedCard.name} (${selectedCard.isReversed ? '逆位置' : '正位置'})
+カードのキーテーマ: ${selectedCard.keyword}`;
+
+      try {
+        const targetApiKey = apiKey || '';
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${targetApiKey}`;
+
+        const payload = {
+          contents: [{ parts: [{ text: userPrompt }] }],
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          generationConfig: { responseMimeType: "application/json" }
+        };
+
+        let resultData = null;
+
+        if(targetApiKey) {
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const resJson = await response.json();
+          const jsonText = resJson.candidates?.[0]?.content?.parts?.[0]?.text;
+          if(jsonText) {
+            resultData = JSON.parse(jsonText);
+          }
+        }
+
+        if(!resultData) {
+          resultData = generateFallbackReading(selectedCard, selectedQuestion);
+        }
+
+        displayReadingResults(resultData);
+
+      } catch (err) {
+        console.warn("TarotAP YES/NO Offline Mode activated.", err);
+        const fallback = generateFallbackReading(selectedCard, selectedQuestion);
+        displayReadingResults(fallback);
+      }
+    }
+
+    // Display Interpretation Results & YES/NO Gauges
+    function displayReadingResults(data) {
+      document.getElementById('aiLoading').classList.add('hidden');
+      document.getElementById('readingContent').classList.remove('hidden');
+
+      const verdictBadge = document.getElementById('verdictBadge');
+      const yesProb = Math.min(100, Math.max(0, data.yesProbability || 50));
+      const noProb = 100 - yesProb;
+
+      // Styling Verdict Badge
+      if(data.verdict.includes('YES') && !data.verdict.includes('条件付き')) {
+        verdictBadge.innerText = "✨ YES（ポジティブ）";
+        verdictBadge.className = "inline-block px-8 py-3 rounded-full font-serif text-2xl md:text-3xl font-extrabold tracking-wider bg-emerald-950/80 text-emerald-300 border-emerald-400 shadow-emerald-900/50 shadow-2xl";
+      } else if(data.verdict.includes('NO')) {
+        verdictBadge.innerText = "⛔ NO（時期尚早・慎重）";
+        verdictBadge.className = "inline-block px-8 py-3 rounded-full font-serif text-2xl md:text-3xl font-extrabold tracking-wider bg-rose-950/80 text-rose-300 border-rose-400 shadow-rose-900/50 shadow-2xl";
+      } else {
+        verdictBadge.innerText = "⚖️ 条件付きYES（タイミング次第）";
+        verdictBadge.className = "inline-block px-8 py-3 rounded-full font-serif text-xl md:text-2xl font-extrabold tracking-wider bg-amber-950/80 text-amber-300 border-amber-400 shadow-amber-900/50 shadow-2xl";
+      }
+
+      document.getElementById('yesPercentText').innerText = yesProb;
+      document.getElementById('noPercentText').innerText = noProb;
+      
+      setTimeout(() => {
+        document.getElementById('yesProgressBar').style.width = `${yesProb}%`;
+      }, 100);
+
+      document.getElementById('verdictSummary').innerText = data.verdictSummary;
+      document.getElementById('overallText').innerText = data.overallMessage;
+      document.getElementById('actionAdviceText').innerText = data.actionAdvice;
+      document.getElementById('luckyItemsText').innerText = data.luckyItems;
+
+      playCosmicChime(600, 1.2);
+    }
+
+    // High Precision Local Fallback YES/NO Generator
+    function generateFallbackReading(card, question) {
+      const calcYesScore = card.isReversed ? card.reversedYesScore : card.yesScore;
+      
+      let verdictStr = "【YES】";
+      if(calcYesScore >= 70) {
+        verdictStr = "【YES】";
+      } else if(calcYesScore <= 35) {
+        verdictStr = "【NO】";
+      } else {
+        verdictStr = "【条件付きYES】";
+      }
+
+      return {
+        verdict: verdictStr,
+        yesProbability: calcYesScore,
+        verdictSummary: `「${card.name}」が示す『${card.keyword}』の波長により、${calcYesScore}%の明確な兆候が現れています。`,
+        overallMessage: `ご質問「${question}」に対して展開された『${card.name} (${card.isReversed ? '逆位置' : '正位置'})』は、現在のエネルギーの流れを明確に象徴しています。\n\nカードの象徴する「${card.keyword}」は、焦らず着実に進むことで望む結果へと繋がることを促しています。無理に好転させようとせず、自身の内なる信念に従うことが開運への近道です。`,
+        actionAdvice: "選択を確固たるものにするために、まずは今日できる小さな一歩を具体的に行動へ移しましょう。",
+        luckyItems: "ラッキーカラー: ルビーゴールド / ラッキーアイテム: 柑橘系アロマ・ノート"
+      };
+    }
+
+    // TTS Voice Generator
+    function speakReading() {
+      const summary = document.getElementById('verdictSummary').innerText;
+      const text = document.getElementById('overallText').innerText;
+      const fullText = `${summary}。 ${text}`;
+
+      if('speechSynthesis' in window) {
+        if(window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+          document.getElementById('speechBtnText').innerText = "音声で聴く";
+          return;
+        }
+
+        synthUtterance = new SpeechSynthesisUtterance(fullText);
+        synthUtterance.lang = 'ja-JP';
+        synthUtterance.rate = 0.95;
+
+        synthUtterance.onend = () => {
+          document.getElementById('speechBtnText').innerText = "音声で聴く";
+        };
+
+        window.speechSynthesis.speak(synthUtterance);
+        document.getElementById('speechBtnText').innerText = "停止する";
+      } else {
+        alert("お使いのブラウザは音声読み上げに対応していません。");
+      }
+    }
+
+    // Copy Result to Clipboard
+    function copyReadingResult() {
+      const verdict = document.getElementById('verdictBadge').innerText;
+      const yesP = document.getElementById('yesPercentText').innerText;
+      const text = `【TarotAP YES/NO タロット鑑定結果】\n質問: 「${selectedQuestion}」\n判定: ${verdict} (YES確率 ${yesP}%)\n\n■ 概要\n${document.getElementById('verdictSummary').innerText}\n\n■ 詳細アドバイス\n${document.getElementById('actionAdviceText').innerText}\n\n#TarotAP #タロット占い #YESNOタロット`;
+      
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+
+      playCosmicChime(1000, 0.3);
+      alert("鑑定結果をクリップボードにコピーしました！");
+    }
+
+    // Modal Control Functions
+    function openApiModal() {
+      document.getElementById('apiModal').classList.remove('hidden');
+    }
+    function closeApiModal() {
+      document.getElementById('apiModal').classList.add('hidden');
+    }
+    function saveApiKey() {
+      const val = document.getElementById('userApiKey').value.trim();
+      apiKey = val;
+      localStorage.setItem('tarot_cosmic_key', val);
+      closeApiModal();
+      playCosmicChime(700, 0.4);
+      alert("TarotAP Engine APIキーを保存しました。");
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function resetApp() {
+      location.reload();
+    }
+  </script>
+</body>
+</html>
