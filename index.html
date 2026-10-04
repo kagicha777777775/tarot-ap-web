@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TarotAP AI - 神秘のオラクルタロット鑑定</title>
   
-  <!-- Tailwind CSS -->
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -300,7 +300,7 @@
             </button>
             <button onclick="copyReadingResult()" class="flex-1 sm:flex-none py-2 px-3.5 rounded-xl bg-purple-900/40 hover:bg-purple-800/60 border border-purple-700/50 text-xs text-purple-200 transition-all flex items-center justify-center space-x-1.5">
               <i class="fa-regular fa-copy text-amber-400"></i>
-              <span>結果をコピー</span>
+              <span id="copyBtnText">結果をコピー</span>
             </button>
           </div>
         </div>
@@ -512,8 +512,8 @@
     </div>
   </div>
 
+  <!-- SCRIPT IMPLEMENTATION -->
   <script>
-    // Cosmic Background Stars Canvas
     const canvas = document.getElementById('stars-canvas');
     const ctx = canvas.getContext('2d');
     let stars = [];
@@ -555,7 +555,6 @@
     resizeCanvas();
     animateStars();
 
-    // TAROT CARDS DATASET (22 Major Arcana)
     const TAROT_CARDS = [
       { id: 0, name: "愚者 (The Fool)", symbol: "🃏", keyword: "自由・冒険・新たな出発", icon: "fa-feather" },
       { id: 1, name: "魔術師 (The Magician)", symbol: "🪄", keyword: "才能開花・スタート・創造力", icon: "fa-wand-magic" },
@@ -576,260 +575,370 @@
       { id: 16, name: "塔 (The Tower)", symbol: "⚡", keyword: "電撃的変化・覚醒・突破", icon: "fa-bolt" },
       { id: 17, name: "星 (The Star)", symbol: "⭐", keyword: "希望・インスピレーション・願いの結実", icon: "fa-star" },
       { id: 18, name: "月 (The Moon)", symbol: "🌙", keyword: "胸の騒ぎ・潜在意識・時間の解決", icon: "fa-moon" },
-      { id: 19, name: "太陽 (The Sun)", symbol: "☀️", keyword: "成功・祝福・溢れるエネルギー", icon: "fa-sun" },
-      { id: 20, name: "審判 (Judgement)", symbol: "📯", keyword: "復活・覚醒・真実の決定", icon: "fa-bell" },
-      { id: 21, name: "世界 (The World)", symbol: "🌍", keyword: "完全成就・大団円・最高の答え", icon: "fa-globe" }
+      { id: 19, name: "太陽 (The Sun)", symbol: "☀️", keyword: "祝福・成功・エネルギーの開花", icon: "fa-sun" },
+      { id: 20, name: "審判 (Judgement)", symbol: "🎺", keyword: "覚醒・チャンスの再来・決心", icon: "fa-bullhorn" },
+      { id: 21, name: "世界 (The World)", symbol: "🌍", keyword: "完成・達成・理想の結実", icon: "fa-globe" }
     ];
 
-    // App State
     let currentSpread = 'single'; // 'single' or 'three'
     let selectedCategory = '総合運・人生';
-    let userQuestionText = '';
-    let selectedCards = [];
+    let drawnCards = [];
     let isSoundOn = false;
+    let audioCtx = null;
+    let currentSpeakingUtterance = null;
 
-    // Spread selection
-    function selectSpread(type) {
-      currentSpread = type;
-      const singleBtn = document.getElementById('spreadSingleBtn');
-      const threeBtn = document.getElementById('spreadThreeBtn');
-      
-      if(type === 'single') {
-        singleBtn.className = "py-3 px-4 rounded-xl font-sans text-sm font-semibold transition-all flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-800 to-cosmic-600 text-amber-300 shadow-md border border-amber-500/30";
-        threeBtn.className = "py-3 px-4 rounded-xl font-sans text-sm font-semibold transition-all flex items-center justify-center space-x-2 text-purple-300 hover:text-white hover:bg-cosmic-700/50";
-        document.getElementById('requiredCountText').innerText = '1';
-      } else {
-        threeBtn.className = "py-3 px-4 rounded-xl font-sans text-sm font-semibold transition-all flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-800 to-cosmic-600 text-amber-300 shadow-md border border-amber-500/30";
-        singleBtn.className = "py-3 px-4 rounded-xl font-sans text-sm font-semibold transition-all flex items-center justify-center space-x-2 text-purple-300 hover:text-white hover:bg-cosmic-700/50";
-        document.getElementById('requiredCountText').innerText = '3';
-      }
-    }
-
-    function setCategory(cat) {
-      selectedCategory = cat;
-      const btns = document.querySelectorAll('.cat-btn');
-      btns.forEach(btn => {
-        if(btn.innerText.includes(cat.split('・')[0])) {
-          btn.className = "cat-btn py-2.5 px-3 rounded-xl border border-amber-500/60 bg-purple-900/40 transition-all text-amber-300 font-bold active-cat";
-        } else {
-          btn.className = "cat-btn py-2.5 px-3 rounded-xl border border-purple-700/50 bg-cosmic-900/60 hover:border-amber-500/60 transition-all text-purple-200";
+    // Web Audio Synthesizer for Mystical Sound FX
+    function playMysticSound(type) {
+      if (!isSoundOn) return;
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
-      });
-    }
-
-    function startTarotSession() {
-      userQuestionText = document.getElementById('userQuestion').value.trim();
-      selectedCards = [];
-      document.getElementById('selectedCountText').innerText = '0';
-      document.getElementById('drawCardsBtn').classList.add('hidden');
-      document.getElementById('shuffleStatusText').innerHTML = `<i class="fa-solid fa-hand-pointer mr-1.5"></i> デッキをタッチしてカードを展開`;
-      
-      document.getElementById('setupSection').classList.add('hidden');
-      document.getElementById('shuffleSection').classList.remove('hidden');
-      document.getElementById('shuffleSection').classList.add('flex');
-    }
-
-    function handleDeckClick() {
-      const req = currentSpread === 'single' ? 1 : 3;
-      if(selectedCards.length < req) {
-        // Pick random unique card
-        let pool = TAROT_CARDS.filter(c => !selectedCards.some(sc => sc.id === c.id));
-        let pick = pool[Math.floor(Math.random() * pool.length)];
-        let isReversed = Math.random() < 0.3;
-        
-        selectedCards.push({ ...pick, isReversed });
-        document.getElementById('selectedCountText').innerText = selectedCards.length;
-
-        // Animate Deck Stack
-        const deck = document.getElementById('cardDeckStack');
-        deck.classList.add('scale-95');
-        setTimeout(() => deck.classList.remove('scale-95'), 150);
-
-        if(selectedCards.length === req) {
-          document.getElementById('shuffleStatusText').innerText = "✨ すべてのカードが選ばれました";
-          document.getElementById('drawCardsBtn').classList.remove('hidden');
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
         }
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'shuffle') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(150, now);
+          osc.frequency.exponentialRampToValueAtTime(450, now + 0.15);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        } else if (type === 'flip') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(300, now);
+          osc.frequency.exponentialRampToValueAtTime(800, now + 0.2);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        } else if (type === 'chime') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now); // C5
+          osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+          osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+          osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+          osc.start(now);
+          osc.stop(now + 0.8);
+        }
+      } catch (e) {
+        console.warn("Audio synthesis error:", e);
       }
-    }
-
-    function drawCards() {
-      document.getElementById('shuffleSection').classList.add('hidden');
-      document.getElementById('shuffleSection').classList.remove('flex');
-      document.getElementById('spreadDisplaySection').classList.remove('hidden');
-      renderSpreadCards();
-    }
-
-    function renderSpreadCards() {
-      const grid = document.getElementById('cardsGrid');
-      grid.innerHTML = '';
-
-      if(currentSpread === 'single') {
-        grid.className = "flex justify-center max-w-4xl mx-auto";
-      } else {
-        grid.className = "grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto justify-items-center";
-      }
-
-      const positionLabels = currentSpread === 'single' ? ['神託カード'] : ['【過去 / 現状】', ['【現在 / 課題】'], ['【未来 / 展望】']];
-
-      selectedCards.forEach((card, index) => {
-        const cardElem = document.createElement('div');
-        cardElem.className = "w-60 h-80 perspective-1000 my-2";
-        cardElem.innerHTML = `
-          <div class="card-inner relative w-full h-full rounded-2xl cursor-pointer shadow-2xl transition-transform duration-700" id="cardInner_${index}" onclick="flipSingleCard(${index})">
-            <div class="card-front absolute inset-0 bg-gradient-to-br from-purple-950 via-cosmic-900 to-purple-900 border-2 border-amber-500/40 rounded-2xl p-4 flex flex-col justify-between items-center gold-border">
-              <span class="text-xs font-sans tracking-widest text-amber-400/80">${positionLabels[index]}</span>
-              <div class="w-full h-full border border-amber-400/20 rounded-xl flex items-center justify-center relative overflow-hidden my-3">
-                <i class="fa-solid fa-eye text-5xl text-amber-400/30 animate-pulse"></i>
-              </div>
-              <span class="text-xs font-sans text-purple-300/70">タップして開眼</span>
-            </div>
-            
-            <div class="card-back absolute inset-0 bg-cosmic-800 border-2 border-amber-400 rounded-2xl p-4 flex flex-col justify-between items-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900 via-cosmic-900 to-black">
-              <div class="text-center">
-                <span class="text-[11px] text-amber-400 font-sans tracking-widest uppercase block">${positionLabels[index]}</span>
-                <h4 class="font-serif font-bold text-sm text-amber-200 mt-1">${card.name}</h4>
-                <span class="text-[10px] px-2 py-0.5 rounded ${card.isReversed ? 'bg-rose-950/80 text-rose-300 border border-rose-500/30' : 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/30'} font-sans inline-block mt-1">
-                  ${card.isReversed ? '逆位置 (Reversed)' : '正位置 (Upright)'}
-                </span>
-              </div>
-
-              <div class="my-3 text-center">
-                <div class="text-5xl filter drop-shadow-[0_0_15px_rgba(245,158,11,0.5)] ${card.isReversed ? 'rotate-180' : ''}">
-                  ${card.symbol}
-                </div>
-              </div>
-
-              <div class="text-center w-full bg-cosmic-900/80 p-2 rounded-xl border border-purple-800/40">
-                <p class="text-xs font-sans text-amber-300/90 font-medium">${card.keyword}</p>
-              </div>
-            </div>
-          </div>
-        `;
-        grid.appendChild(cardElem);
-      });
-
-      document.getElementById('aiReadingTriggerBox').classList.remove('hidden');
-    }
-
-    function flipSingleCard(index) {
-      const inner = document.getElementById(`cardInner_${index}`);
-      if(inner) inner.classList.add('card-flipped');
-    }
-
-    function fetchCosmicReading() {
-      // Flip all cards
-      selectedCards.forEach((_, i) => flipSingleCard(i));
-
-      document.getElementById('spreadDisplaySection').classList.add('hidden');
-      document.getElementById('readingResultSection').classList.remove('hidden');
-
-      const titleQ = userQuestionText ? `「${userQuestionText}」` : `【${selectedCategory}】`;
-      document.getElementById('resultTitle').innerText = `${titleQ} の鑑定結果`;
-
-      // Simulate AI Loading
-      setTimeout(() => {
-        generateInterpretation();
-      }, 1500);
-    }
-
-    function generateInterpretation() {
-      document.getElementById('aiLoading').classList.add('hidden');
-      document.getElementById('readingContent').classList.remove('hidden');
-
-      // Generate text based on selection
-      let overallMsg = "";
-      if(currentSpread === 'single') {
-        const c = selectedCards[0];
-        overallMsg = `【${selectedCategory}】について導き出された『${c.name} (${c.isReversed ? '逆位置' : '正位置'})』は、現在のあなたに「${c.keyword}」のエネルギーが強く影響していることを伝えています。\n\n宇宙の波動は今、あなたが内面の声を信じて新しい一歩を踏み出すタイミングを示しています。迷いを手放し、自らの直感に従うことで道が開かれるでしょう。`;
-      } else {
-        overallMsg = `【スリーカード神託】\n過去の『${selectedCards[0].name}』が示した経験が、現在の『${selectedCards[1].name}』における課題や気づきを形成しています。\nそして未来の『${selectedCards[2].name}』は、焦らず自分軸を保つことで望む素晴らしい結末へと向かう未来を暗示しています。`;
-      }
-
-      document.getElementById('overallText').innerText = overallMsg;
-
-      // Card details list
-      const detailsContainer = document.getElementById('cardDetailsContainer');
-      detailsContainer.innerHTML = '';
-
-      selectedCards.forEach((c, idx) => {
-        const item = document.createElement('div');
-        item.className = "bg-purple-950/30 p-4 rounded-xl border border-purple-800/30 space-y-1 font-sans";
-        item.innerHTML = `
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-amber-300 text-sm">${c.name} (${c.isReversed ? '逆位置' : '正位置'})</span>
-            <span class="text-xs text-purple-300">${c.symbol}</span>
-          </div>
-          <p class="text-xs text-purple-200/80">キーワード: ${c.keyword}</p>
-        `;
-        detailsContainer.appendChild(item);
-      });
-
-      document.getElementById('actionAdviceText').innerText = "今日一日、静かに自分の心と向き合う時間を5分作りましょう。浮かんだ思いをノートに書き出すことが好転のキッカケになります。";
-      document.getElementById('luckyItemsText').innerText = "ラッキーカラー: ルビーゴールド / ラッキーアイテム: 水晶・アロマオイル";
-    }
-
-    // Speech synthesis
-    function speakReading() {
-      if ('speechSynthesis' in window) {
-        const text = document.getElementById('overallText').innerText;
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'ja-JP';
-        window.speechSynthesis.speak(utterance);
-      } else {
-        alert("お使いのブラウザは音声読み上げに対応していません。");
-      }
-    }
-
-    function copyReadingResult() {
-      const content = document.getElementById('overallText').innerText;
-      const dummy = document.createElement('textarea');
-      document.body.appendChild(dummy);
-      dummy.value = content;
-      dummy.select();
-      document.execCommand('copy');
-      document.body.removeChild(dummy);
-      alert("鑑定結果をクリップボードにコピーしました！");
-    }
-
-    // Modal controls
-    function openModal(id) {
-      document.getElementById(id).classList.remove('hidden');
-    }
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-    }
-
-    function openApiModal() {
-      openModal('apiModal');
-    }
-    function closeApiModal() {
-      closeModal('apiModal');
-    }
-
-    function saveApiKey() {
-      const key = document.getElementById('userApiKey').value;
-      if(key) {
-        localStorage.setItem('tarot_api_key', key);
-        alert('APIキーをローカル保存しました。');
-      }
-      closeApiModal();
     }
 
     function toggleAudio() {
       isSoundOn = !isSoundOn;
       const icon = document.getElementById('soundIcon');
       const label = document.getElementById('soundLabel');
-      if(isSoundOn) {
-        icon.className = "fa-solid fa-volume-high text-amber-400";
-        label.innerText = "Sound ON";
+      
+      if (isSoundOn) {
+        icon.className = 'fa-solid fa-volume-high text-amber-300';
+        label.innerText = 'Sound ON';
+        playMysticSound('chime');
       } else {
-        icon.className = "fa-solid fa-volume-xmark text-purple-400";
-        label.innerText = "Sound OFF";
+        icon.className = 'fa-solid fa-volume-xmark text-purple-400';
+        label.innerText = 'Sound OFF';
       }
     }
 
+    function selectSpread(type) {
+      currentSpread = type;
+      const singleBtn = document.getElementById('spreadSingleBtn');
+      const threeBtn = document.getElementById('spreadThreeBtn');
+
+      if (type === 'single') {
+        singleBtn.className = "py-3 px-4 rounded-xl font-sans text-sm font-semibold transition-all flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-800 to-cosmic-600 text-amber-300 shadow-md border border-amber-500/30";
+        threeBtn.className = "py-3 px-4 rounded-xl font-sans text-sm font-semibold transition-all flex items-center justify-center space-x-2 text-purple-300 hover:text-white hover:bg-cosmic-700/50";
+      } else {
+        threeBtn.className = "py-3 px-4 rounded-xl font-sans text-sm font-semibold transition-all flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-800 to-cosmic-600 text-amber-300 shadow-md border border-amber-500/30";
+        singleBtn.className = "py-3 px-4 rounded-xl font-sans text-sm font-semibold transition-all flex items-center justify-center space-x-2 text-purple-300 hover:text-white hover:bg-cosmic-700/50";
+      }
+      playMysticSound('flip');
+    }
+
+    function setCategory(cat) {
+      selectedCategory = cat;
+      const buttons = document.querySelectorAll('.cat-btn');
+      buttons.forEach(btn => {
+        if (btn.innerText.includes(cat.split('・')[0])) {
+          btn.className = "cat-btn py-2.5 px-3 rounded-xl border border-amber-500/60 bg-purple-900/40 transition-all text-amber-300 font-bold active-cat";
+        } else {
+          btn.className = "cat-btn py-2.5 px-3 rounded-xl border border-purple-700/50 bg-cosmic-900/60 hover:border-amber-500/60 transition-all text-purple-200";
+        }
+      });
+      playMysticSound('flip');
+    }
+
+    function startTarotSession() {
+      document.getElementById('setupSection').classList.add('hidden');
+      document.getElementById('shuffleSection').classList.remove('hidden');
+      document.getElementById('shuffleSection').classList.add('flex');
+      
+      const reqCount = currentSpread === 'single' ? 1 : 3;
+      document.getElementById('requiredCountText').innerText = reqCount;
+      document.getElementById('selectedCountText').innerText = '0';
+      
+      document.getElementById('drawCardsBtn').classList.add('hidden');
+      document.getElementById('shuffleStatusText').classList.remove('hidden');
+      document.getElementById('shuffleStatusText').innerHTML = '<i class="fa-solid fa-hand-pointer mr-1.5"></i> デッキをタッチしてシャッフルを開始';
+
+      playMysticSound('chime');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    let isShuffling = false;
+    let clickShuffleCount = 0;
+
+    function handleDeckClick() {
+      if (isShuffling) return;
+      isShuffling = true;
+      clickShuffleCount++;
+
+      const deckStack = document.getElementById('cardDeckStack');
+      deckStack.classList.add('animate-spin');
+      playMysticSound('shuffle');
+
+      setTimeout(() => {
+        deckStack.classList.remove('animate-spin');
+        isShuffling = false;
+
+        if (clickShuffleCount >= 1) {
+          document.getElementById('shuffleStatusText').innerHTML = '<i class="fa-solid fa-check text-green-400 mr-1.5"></i> 波動の整列が完了しました';
+          document.getElementById('drawCardsBtn').classList.remove('hidden');
+          playMysticSound('chime');
+        }
+      }, 700);
+    }
+
+    function drawCards() {
+      const cardCount = currentSpread === 'single' ? 1 : 3;
+      drawnCards = [];
+
+      // Randomly pick cards without duplicates
+      const shuffledArray = [...TAROT_CARDS].sort(() => 0.5 - Math.random());
+      for (let i = 0; i < cardCount; i++) {
+        const isReversed = Math.random() < 0.3; // 30% chance for reversed position
+        drawnCards.push({
+          ...shuffledArray[i],
+          isReversed: isReversed,
+          positionLabel: currentSpread === 'single' ? '神託のカード' : (i === 0 ? '【過去・現状】' : (i === 1 ? '【現在・課題】' : '【未来・結末】'))
+        });
+      }
+
+      // Render Cards in Spread Display Section
+      const cardsGrid = document.getElementById('cardsGrid');
+      cardsGrid.innerHTML = '';
+
+      if (currentSpread === 'single') {
+        cardsGrid.className = 'grid grid-cols-1 gap-6 max-w-sm mx-auto justify-items-center';
+      } else {
+        cardsGrid.className = 'grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto justify-items-center';
+      }
+
+      drawnCards.forEach((card, index) => {
+        const cardHtml = `
+          <div class="flex flex-col items-center space-y-3">
+            <span class="text-xs font-serif text-amber-300 font-bold tracking-wider">${card.positionLabel}</span>
+            <div id="cardItem-${index}" onclick="flipCard(${index})" class="w-52 h-80 perspective-1000 cursor-pointer group">
+              <div id="cardInner-${index}" class="card-inner relative w-full h-full duration-700">
+                <!-- Card Back -->
+                <div class="card-front absolute inset-0 bg-cosmic-800 border-2 border-amber-500/40 rounded-2xl shadow-2xl p-3 bg-gradient-to-br from-purple-950 via-cosmic-900 to-purple-900 flex items-center justify-center">
+                  <div class="w-full h-full border border-amber-400/30 rounded-xl flex items-center justify-center relative overflow-hidden">
+                    <i class="fa-solid fa-eye text-4xl text-amber-400/40 group-hover:scale-110 transition-transform"></i>
+                    <p class="absolute bottom-3 text-[10px] text-purple-300/60 font-sans uppercase tracking-widest">Tap to Reveal</p>
+                  </div>
+                </div>
+                <!-- Card Front -->
+                <div class="card-back absolute inset-0 bg-gradient-to-b from-cosmic-800 to-purple-950 border-2 border-amber-400 rounded-2xl shadow-2xl p-4 flex flex-col justify-between items-center text-center gold-border">
+                  <div class="w-full flex justify-between items-center text-xs text-amber-400 font-serif">
+                    <span>${card.id}</span>
+                    <span>${card.isReversed ? '逆位置' : '正位置'}</span>
+                  </div>
+                  <div class="my-auto space-y-2 ${card.isReversed ? 'transform rotate-180' : ''}">
+                    <div class="text-5xl my-2">${card.symbol}</div>
+                    <h4 class="font-serif font-bold text-base text-amber-200">${card.name}</h4>
+                  </div>
+                  <div class="w-full pt-2 border-t border-purple-800/50">
+                    <p class="text-[11px] text-purple-200/80 font-sans line-clamp-1">${card.keyword}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        cardsGrid.innerHTML += cardHtml;
+      });
+
+      document.getElementById('shuffleSection').classList.add('hidden');
+      document.getElementById('shuffleSection').classList.remove('flex');
+      document.getElementById('spreadDisplaySection').classList.remove('hidden');
+      document.getElementById('aiReadingTriggerBox').classList.remove('hidden');
+
+      playMysticSound('chime');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    let flippedCount = 0;
+
+    function flipCard(index) {
+      const inner = document.getElementById(`cardInner-${index}`);
+      if (!inner.classList.contains('card-flipped')) {
+        inner.classList.add('card-flipped');
+        playMysticSound('flip');
+        flippedCount++;
+      }
+    }
+
+    function fetchCosmicReading() {
+      // Automatically flip remaining unflipped cards
+      drawnCards.forEach((_, idx) => {
+        const inner = document.getElementById(`cardInner-${idx}`);
+        if (inner && !inner.classList.contains('card-flipped')) {
+          inner.classList.add('card-flipped');
+        }
+      });
+
+      document.getElementById('spreadDisplaySection').classList.add('hidden');
+      document.getElementById('readingResultSection').classList.remove('hidden');
+      document.getElementById('aiLoading').classList.remove('hidden');
+      document.getElementById('readingContent').classList.add('hidden');
+
+      playMysticSound('chime');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      setTimeout(() => {
+        generateOracleText();
+        document.getElementById('aiLoading').classList.add('hidden');
+        document.getElementById('readingContent').classList.remove('hidden');
+        playMysticSound('chime');
+      }, 1800);
+    }
+
+    function generateOracleText() {
+      const question = document.getElementById('userQuestion').value.trim();
+      const firstCard = drawnCards[0];
+      
+      let overallMessage = "";
+      let detailHtml = "";
+      let adviceText = "";
+      let luckyItemsText = "";
+
+      if (currentSpread === 'single') {
+        overallMessage = `【${selectedCategory}の神託】\n「${firstCard.name}」(${firstCard.isReversed ? '逆位置' : '正位置'})が示されています。\n\n現在のあなたを取り巻く宇宙のエネルギーは『${firstCard.keyword}』を象徴しています。${question ? `ご相談「${question}」に対して、` : ''}${firstCard.isReversed ? '焦らず一歩引いて状況を観察し、自身の内面を見つめ直すことが成功へのキーとなります。' : '迷いを捨てて自分の直感と可能性を信じ、能動的に動くことで道が開けます。'}`;
+      } else {
+        overallMessage = `【${selectedCategory}の神託・スリーカード解釈】\n過去から現在、そして未来へと繋がる運命の流れがカードを通して示されました。\n\n${drawnCards[0].name}が示す過去の経験を受け入れ、現在を示す${drawnCards[1].name}のメッセージに耳を傾けることで、${drawnCards[2].name}が象徴する光り輝く未来へと導かれます。${question ? `ご相談内容「${question}」に関しても、大いなる調和に向かって動いています。` : ''}`;
+      }
+
+      drawnCards.forEach((card) => {
+        detailHtml += `
+          <div class="bg-cosmic-900/60 p-4 rounded-xl border border-purple-800/40 space-y-1.5">
+            <div class="flex justify-between items-center text-xs text-amber-300 font-serif font-bold">
+              <span>${card.positionLabel} : ${card.name} (${card.isReversed ? '逆位置' : '正位置'})</span>
+              <span class="text-purple-400 font-sans">${card.symbol}</span>
+            </div>
+            <p class="text-xs text-purple-200/90 leading-relaxed">
+              キーワード「${card.keyword}」。${card.isReversed ? '本来のパワーが内側に向いている状態です。無理に押し通すのではなく、エネルギーを蓄える期間と捉えましょう。' : 'カードの持つ本来のポジティブなエネルギーがダイレクトに発揮されています。勇気を持って進んでください。'}
+            </p>
+          </div>
+        `;
+      });
+
+      adviceText = `本日のアクションアドバイス：${firstCard.isReversed ? '今日は自身の心身のケアを最優先し、リラックスできる空間で思考をクリアに整えましょう。' : '直感を信じて一歩踏み出す日です。新しいアイデアや連絡には即座に対応してみましょう。'}`;
+      luckyItemsText = `ラッキーカラー：紫（ヴァイオレット）、ゴールド / ラッキーアイテム：クリスタル、ハーブティー`;
+
+      document.getElementById('overallText').innerText = overallMessage;
+      document.getElementById('cardDetailsContainer').innerHTML = detailHtml;
+      document.getElementById('actionAdviceText').innerText = adviceText;
+      document.getElementById('luckyItemsText').innerText = luckyItemsText;
+    }
+
+    function speakReading() {
+      if ('speechSynthesis' in window) {
+        if (speechSynthesis.speaking) {
+          speechSynthesis.cancel();
+          document.getElementById('speechBtnText').innerText = "音声で聴く";
+          return;
+        }
+
+        const textToRead = document.getElementById('overallText').innerText + " " + document.getElementById('actionAdviceText').innerText;
+        currentSpeakingUtterance = new SpeechSynthesisUtterance(textToRead);
+        currentSpeakingUtterance.lang = 'ja-JP';
+        currentSpeakingUtterance.rate = 0.95;
+
+        currentSpeakingUtterance.onend = () => {
+          document.getElementById('speechBtnText').innerText = "音声で聴く";
+        };
+
+        speechSynthesis.speak(currentSpeakingUtterance);
+        document.getElementById('speechBtnText').innerText = "停止する";
+      } else {
+        alert("お使いのブラウザは音声読み上げに対応しておりません。");
+      }
+    }
+
+    function copyReadingResult() {
+      const overall = document.getElementById('overallText').innerText;
+      const advice = document.getElementById('actionAdviceText').innerText;
+      const fullText = `【TarotAP AI 神託結果】\n\n${overall}\n\n${advice}\n\n#TarotAP #タロット占い`;
+
+      navigator.clipboard.writeText(fullText).then(() => {
+        const copyBtnText = document.getElementById('copyBtnText');
+        copyBtnText.innerText = "コピー完了！";
+        setTimeout(() => { copyBtnText.innerText = "結果をコピー"; }, 2000);
+      });
+    }
+
+    function openApiModal() {
+      document.getElementById('apiModal').classList.remove('hidden');
+      const savedKey = localStorage.getItem('tarot_ap_key') || '';
+      document.getElementById('userApiKey').value = savedKey;
+    }
+
+    function closeApiModal() {
+      document.getElementById('apiModal').classList.add('hidden');
+    }
+
+    function saveApiKey() {
+      const key = document.getElementById('userApiKey').value.trim();
+      localStorage.setItem('tarot_ap_key', key);
+      closeApiModal();
+      playMysticSound('chime');
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
     function resetApp() {
-      location.reload();
+      if (speechSynthesis.speaking) {
+        speechSynthesis.cancel();
+      }
+      clickShuffleCount = 0;
+      drawnCards = [];
+      
+      document.getElementById('setupSection').classList.remove('hidden');
+      document.getElementById('shuffleSection').classList.add('hidden');
+      document.getElementById('spreadDisplaySection').classList.add('hidden');
+      document.getElementById('readingResultSection').classList.add('hidden');
+      document.getElementById('userQuestion').value = '';
+      
+      playMysticSound('chime');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   </script>
 </body>
