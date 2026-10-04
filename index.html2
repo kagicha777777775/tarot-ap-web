@@ -153,14 +153,6 @@
     </div>
   </header>
 
-  <!-- Top Ad Banner -->
-  <div class="max-w-7xl mx-auto w-full px-4 pt-4">
-    <div class="bg-cosmic-800/30 border border-purple-900/30 rounded-2xl p-2 text-center text-xs text-purple-400/60 flex items-center justify-center min-h-[60px]">
-      <i class="fa-solid fa-rectangle-ad text-amber-500/40 text-lg mr-2"></i>
-      <span>スポンサーリンク (Google AdSense 枠)</span>
-    </div>
-  </div>
-
   <main class="max-w-5xl mx-auto w-full px-4 py-6 flex-grow flex flex-col justify-center items-center">
     
     <!-- STEP 1: Question Setup Panel -->
@@ -178,7 +170,7 @@
         </p>
       </div>
 
-      <!-- Quick Preset Questions Section (10 Topics) -->
+      <!-- Quick Preset Questions Section -->
       <div class="bg-cosmic-800/40 backdrop-blur-md border border-purple-800/40 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative gold-border">
         <div class="space-y-3">
           <div class="flex items-center justify-between">
@@ -232,13 +224,12 @@
           </div>
         </div>
 
-        <!-- Custom Manual Input Area -->
         <div class="space-y-2 pt-2 border-t border-purple-800/40">
           <label class="block text-xs font-sans font-medium uppercase tracking-widest text-amber-400">
             <i class="fa-solid fa-pen-nib mr-1.5"></i> 自分で質問を文章で入力する
           </label>
           <div class="relative">
-            <textarea id="userQuestion" rows="3" placeholder="「YES」または「NO」で答えられる質問を入力してください（例：今日告白しても成功しますか？など）" class="w-full bg-cosmic-900/80 border border-purple-800/60 rounded-2xl p-4 text-sm text-purple-100 placeholder-purple-400/40 focus:outline-none focus:border-amber-400/80 focus:ring-1 focus:ring-amber-400/50 transition-all font-sans"></textarea>
+            <textarea id="userQuestion" rows="3" placeholder="「YES」または「NO」で答えられる質問を入力してください" class="w-full bg-cosmic-900/80 border border-purple-800/60 rounded-2xl p-4 text-sm text-purple-100 placeholder-purple-400/40 focus:outline-none focus:border-amber-400/80 focus:ring-1 focus:ring-amber-400/50 transition-all font-sans"></textarea>
           </div>
         </div>
 
@@ -251,7 +242,7 @@
       </div>
     </section>
 
-    <!-- STEP 2: Card Shuffle & Draw Screen -->
+    <!-- STEP 2: Card Shuffle Section -->
     <section id="shuffleSection" class="w-full hidden space-y-8 flex-col items-center justify-center py-6 animate-fade-in">
       <div class="text-center space-y-2">
         <h3 id="shuffleTitle" class="text-2xl font-serif font-bold gold-gradient-text">意識をカードに集中させてください</h3>
@@ -290,9 +281,7 @@
         <h3 class="text-2xl md:text-3xl font-serif font-bold gold-gradient-text">運命の導き手</h3>
       </div>
 
-      <div id="cardsGrid" class="flex justify-center max-w-4xl mx-auto">
-        <!-- Dynamic Card Inserted Here -->
-      </div>
+      <div id="cardsGrid" class="flex justify-center max-w-4xl mx-auto"></div>
 
       <div id="aiReadingTriggerBox" class="text-center pt-4 hidden">
         <button id="generateReadingBtn" onclick="fetchCosmicReading()" class="py-4 px-10 rounded-2xl bg-gradient-to-r from-amber-500 via-purple-600 to-cosmic-600 text-white font-serif font-bold text-base md:text-lg shadow-2xl hover:scale-105 active:scale-95 transition-all border border-amber-300/40">
@@ -304,10 +293,8 @@
 
     <!-- STEP 4: YES/NO Reading Result Screen -->
     <section id="readingResultSection" class="w-full hidden space-y-8 animate-fade-in">
-      
       <div class="bg-cosmic-800/50 backdrop-blur-xl border border-purple-800/50 rounded-3xl p-6 md:p-10 shadow-2xl space-y-8 relative overflow-hidden gold-border">
         
-        <!-- Header Controls -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-purple-800/40 pb-6 gap-4">
           <div>
             <div class="flex items-center space-x-2 text-xs text-amber-400 font-sans mb-1">
@@ -331,7 +318,6 @@
           </div>
         </div>
 
-        <!-- AI Loading Spinner -->
         <div id="aiLoading" class="py-16 text-center space-y-4">
           <div class="inline-block relative w-16 h-16">
             <div class="w-16 h-16 rounded-full border-4 border-purple-900 border-t-amber-400 animate-spin"></div>
@@ -342,10 +328,7 @@
           </p>
         </div>
 
-        <!-- Result Display Container -->
         <div id="readingContent" class="hidden space-y-8 font-sans text-sm md:text-base leading-relaxed">
-          
-          <!-- Core YES/NO Badge & Probability Gauge -->
           <div class="bg-gradient-to-br from-purple-950/80 via-cosmic-900 to-purple-900/80 p-6 md:p-8 rounded-3xl border border-amber-500/30 text-center space-y-6 shadow-xl relative overflow-hidden">
             <div class="space-y-2">
               <span class="text-xs uppercase font-sans tracking-widest text-amber-400">Decision Conclusion</span>
@@ -354,7 +337,6 @@
               </div>
             </div>
 
-            <!-- Probability Bar -->
             <div class="max-w-md mx-auto space-y-2">
               <div class="flex justify-between text-xs font-bold font-sans">
                 <span class="text-emerald-400"><i class="fa-solid fa-circle-check"></i> YES傾向: <span id="yesPercentText">0</span>%</span>
@@ -368,7 +350,6 @@
             <p id="verdictSummary" class="text-sm font-medium text-purple-200/90 leading-relaxed max-w-xl mx-auto"></p>
           </div>
 
-          <!-- Overall Detailed Interpretation Message -->
           <div class="space-y-3 bg-cosmic-900/60 p-5 md:p-6 rounded-2xl border border-purple-800/30">
             <h4 class="font-serif font-bold text-amber-300 text-lg flex items-center">
               <i class="fa-solid fa-scroll mr-2 text-amber-400 text-sm"></i> 神託の詳細解説＆カードの意味
@@ -376,7 +357,6 @@
             <p id="overallText" class="text-purple-100/90 whitespace-pre-line leading-relaxed"></p>
           </div>
 
-          <!-- Actionable Steps & Key Advice -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
             <div class="bg-purple-950/40 p-5 rounded-2xl border border-purple-800/40 space-y-2">
               <h5 class="font-bold text-amber-300 text-sm flex items-center">
@@ -394,61 +374,12 @@
         </div>
       </div>
 
-      <!-- AFFILIATE & ADVERTISEMENT SECTION -->
-      <div class="space-y-6 pt-4">
-        <div class="text-center space-y-1">
-          <span class="text-[11px] font-sans text-amber-400/80 uppercase tracking-widest">Recommended Oracle Items</span>
-          <h4 class="font-serif text-lg font-bold text-purple-200">さらに運気を高める開運・鑑定アイテム</h4>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <a href="https://www.amazon.co.jp/dp/B00000J228?tag=YOUR_AMAZON_TAG-22" target="_blank" rel="noopener noreferrer" class="bg-cosmic-800/40 hover:bg-cosmic-700/60 border border-purple-800/40 hover:border-amber-500/50 rounded-2xl p-4 transition-all flex items-center space-x-4 group">
-            <div class="w-16 h-16 rounded-xl bg-purple-950 flex items-center justify-center text-amber-400 border border-amber-500/20 flex-shrink-0 group-hover:scale-105 transition-transform">
-              <i class="fa-solid fa-book-sparkles text-2xl"></i>
-            </div>
-            <div class="space-y-1 overflow-hidden">
-              <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-sans">Amazon アソシエイト</span>
-              <h5 class="text-xs font-bold text-purple-100 group-hover:text-amber-300 transition-colors truncate">ライダー・ウェイト版タロット</h5>
-              <p class="text-[11px] text-purple-300/70 line-clamp-2">YES/NOタロットで最も信頼される定番カードデッキ。</p>
-            </div>
-          </a>
-
-          <a href="https://www.amazon.co.jp/s?k=%E7%8F%BE%E7%9F%B3+%E6%B0%B4%E6%99%B6&tag=YOUR_AMAZON_TAG-22" target="_blank" rel="noopener noreferrer" class="bg-cosmic-800/40 hover:bg-cosmic-700/60 border border-purple-800/40 hover:border-amber-500/50 rounded-2xl p-4 transition-all flex items-center space-x-4 group">
-            <div class="w-16 h-16 rounded-xl bg-purple-950 flex items-center justify-center text-amber-400 border border-amber-500/20 flex-shrink-0 group-hover:scale-105 transition-transform">
-              <i class="fa-solid fa-gem text-2xl"></i>
-            </div>
-            <div class="space-y-1 overflow-hidden">
-              <span class="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-sans">浄化・開運アイテム</span>
-              <h5 class="text-xs font-bold text-purple-100 group-hover:text-amber-300 transition-colors truncate">天然水晶クラスター</h5>
-              <p class="text-[11px] text-purple-300/70 line-clamp-2">直感力を研ぎ澄まし、迷いをクリアにする波動天然石。</p>
-            </div>
-          </a>
-
-          <a href="https://px.a8.net/svt/ejp?a8mat=YOUR_A8_ID" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-purple-900/60 to-cosmic-700/60 hover:from-purple-800 hover:to-cosmic-600 border border-amber-500/40 rounded-2xl p-4 transition-all flex items-center space-x-4 group sm:col-span-2 lg:col-span-1 shadow-lg">
-            <div class="w-16 h-16 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-300 border border-amber-400/40 flex-shrink-0 group-hover:scale-105 transition-transform">
-              <i class="fa-solid fa-headset text-2xl"></i>
-            </div>
-            <div class="space-y-1 overflow-hidden">
-              <span class="text-[10px] bg-purple-500/30 text-purple-200 px-2 py-0.5 rounded font-sans">個別相談サービス</span>
-              <h5 class="text-xs font-bold text-amber-300 group-hover:text-amber-200 transition-colors truncate">プロ占い師に電話で直接相談</h5>
-              <p class="text-[11px] text-purple-200/80 line-clamp-2">複雑な恋愛や人生の決断を24時間いつでもじっくり鑑定。</p>
-            </div>
-          </a>
-        </div>
-
-        <div class="bg-cosmic-800/30 border border-purple-900/30 rounded-2xl p-3 text-center text-xs text-purple-400/60 flex items-center justify-center min-h-[90px]">
-          <i class="fa-solid fa-rectangle-ad mr-2 text-amber-500/40"></i>
-          <span>スポンサーリンク (Google AdSense レスポンシブ枠)</span>
-        </div>
-      </div>
-
       <div class="text-center pt-6">
         <button onclick="resetApp()" class="py-3 px-8 rounded-full bg-cosmic-800 hover:bg-cosmic-700 text-purple-200 border border-purple-700/50 text-xs font-sans transition-all inline-flex items-center space-x-2">
           <i class="fa-solid fa-rotate-left"></i>
           <span>新しい質問でYES/NOを占う</span>
         </button>
       </div>
-
     </section>
   </main>
 
@@ -458,254 +389,42 @@
         <p class="font-serif font-bold text-purple-200 text-sm">TarotAP YES/NO Engine</p>
         <p class="text-[11px]">Powered by TarotAP Cosmic Decision Algorithm</p>
       </div>
-
-      <div class="flex flex-wrap justify-center gap-4 text-purple-300/70">
-        <button onclick="openModal('termsModal')" class="hover:text-amber-300 transition-colors">利用規約</button>
-        <span>•</span>
-        <button onclick="openModal('privacyModal')" class="hover:text-amber-300 transition-colors">プライバシーポリシー</button>
-        <span>•</span>
-        <button onclick="openModal('tokushohoModal')" class="hover:text-amber-300 transition-colors">特定商取引法に基づく表記</button>
-      </div>
-    </div>
-    <div class="border-t border-purple-900/30 pt-4 text-[10px]">
-      &copy; 2026 TarotAP AI All Rights Reserved. 当サイトのタロット判定はエンターテインメント目的で提供されています。
     </div>
   </footer>
 
-  <!-- MODALS -->
-  <div id="apiModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-cosmic-800 border border-amber-500/30 rounded-3xl p-6 md:p-8 max-w-md w-full space-y-6 shadow-2xl relative">
-      <button onclick="closeApiModal()" class="absolute top-4 right-4 text-purple-400 hover:text-white text-lg">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-
-      <div class="space-y-2">
-        <div class="flex items-center space-x-2 text-amber-400 font-serif font-bold text-lg">
-          <i class="fa-solid fa-key"></i>
-          <h3>鑑定Engine APIキー設定</h3>
-        </div>
-        <p class="text-xs text-purple-200/70 font-sans leading-relaxed">
-          TarotAP Cosmic Engineで高精度なYES/NO解釈を生成するためのAPIキーを設定します。未設定の場合は標準判定プロトコルが自動適用されます。
-        </p>
-      </div>
-
-      <div class="space-y-2 font-sans">
-        <label class="block text-xs font-semibold text-amber-300 uppercase tracking-wider">TarotAP Engine Key</label>
-        <input type="password" id="userApiKey" placeholder="AI-xxxxxxxxxxxxxxxxxxxx" class="w-full bg-cosmic-900 border border-purple-700/60 rounded-xl p-3 text-xs text-purple-100 placeholder-purple-500/40 focus:outline-none focus:border-amber-400">
-        <p class="text-[10px] text-purple-400/60">※キーは暗号化され、お客様のブラウザ内にのみローカル保存されます。</p>
-      </div>
-
-      <div class="flex space-x-3 pt-2 font-sans text-xs">
-        <button onclick="saveApiKey()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-purple-600 font-bold text-white shadow-md hover:brightness-110 transition-all">
-          設定を保存する
-        </button>
-        <button onclick="closeApiModal()" class="py-3 px-4 rounded-xl bg-cosmic-900 border border-purple-800 text-purple-300">
-          閉じる
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div id="termsModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-cosmic-800 border border-purple-800 rounded-3xl p-6 md:p-8 max-w-2xl w-full max-h-[80vh] flex flex-col space-y-4 shadow-2xl relative">
-      <div class="flex justify-between items-center border-b border-purple-800/40 pb-3">
-        <h3 class="font-serif font-bold text-amber-300 text-lg">利用規約</h3>
-        <button onclick="closeModal('termsModal')" class="text-purple-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="overflow-y-auto text-xs text-purple-200/80 font-sans space-y-3 leading-relaxed pr-2">
-        <p>第1条（適用）本規約は、TarotAP YES/NO AI（以下「当サービス」）が提供するすべてのコンテンツおよび鑑定機能の利用に適用されます。</p>
-        <p>第2条（免責事項）当サービスのYES/NO判定結果はタロットカードの象徴に基づき生成されたものであり、将来の決定や結果を絶対的に保証するものではありません。</p>
-      </div>
-    </div>
-  </div>
-
-  <div id="privacyModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-cosmic-800 border border-purple-800 rounded-3xl p-6 md:p-8 max-w-2xl w-full max-h-[80vh] flex flex-col space-y-4 shadow-2xl relative">
-      <div class="flex justify-between items-center border-b border-purple-800/40 pb-3">
-        <h3 class="font-serif font-bold text-amber-300 text-lg">プライバシーポリシー</h3>
-        <button onclick="closeModal('privacyModal')" class="text-purple-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="overflow-y-auto text-xs text-purple-200/80 font-sans space-y-3 leading-relaxed pr-2">
-        <p>個人情報の取り扱いについて：入力された質問文およびローカルストレージ内のAPIキーは外部サーバーに永続保存されません。</p>
-      </div>
-    </div>
-  </div>
-
-  <div id="tokushohoModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-cosmic-800 border border-purple-800 rounded-3xl p-6 md:p-8 max-w-2xl w-full max-h-[80vh] flex flex-col space-y-4 shadow-2xl relative">
-      <div class="flex justify-between items-center border-b border-purple-800/40 pb-3">
-        <h3 class="font-serif font-bold text-amber-300 text-lg">特定商取引法に基づく表記</h3>
-        <button onclick="closeModal('tokushohoModal')" class="text-purple-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="overflow-y-auto text-xs text-purple-200/80 font-sans space-y-2 leading-relaxed pr-2">
-        <p><strong>事業者名称：</strong> TarotAP AI 運営事務局</p>
-        <p><strong>サービス形態：</strong> 無料ウェブ占いコンテンツ</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- JAVASCRIPT APP LOGIC -->
   <script>
-    // Major Arcana with Specific YES/NO Score Propensities (Upright YES %, Reversed YES %)
+    // 【修正ポイント1】 TAROT_CARDS のデータ配列に画像パス (image) を追加しました。
+    // GitHubのリポジトリ内の画像保存場所（例：images/fool.jpg）に合わせたパスを指定してください。
     const TAROT_CARDS = [
-      { id: 0, name: "愚者 (The Fool)", symbol: "🃏", yesScore: 75, reversedYesScore: 35, keyword: "自由・冒険・新たな挑戦", icon: "fa-feather" },
-      { id: 1, name: "魔術師 (The Magician)", symbol: "🪄", yesScore: 90, reversedYesScore: 40, keyword: "才能開花・スタート・準備完了", icon: "fa-wand-magic" },
-      { id: 2, name: "女教皇 (The High Priestess)", symbol: "📜", yesScore: 45, reversedYesScore: 25, keyword: "静観・直感・慎重な観察", icon: "fa-book-open" },
-      { id: 3, name: "女帝 (The Empress)", symbol: "👑", yesScore: 95, reversedYesScore: 50, keyword: "繁栄・愛・実り豊かさ", icon: "fa-crown" },
-      { id: 4, name: "皇帝 (The Emperor)", symbol: "🏛️", yesScore: 85, reversedYesScore: 30, keyword: "リーダーシップ・実行・達成", icon: "fa-chess-king" },
-      { id: 5, name: "法王 (The Hierophant)", symbol: "⛪", yesScore: 70, reversedYesScore: 40, keyword: "信頼・伝統・アドバイス受容", icon: "fa-hands-praying" },
-      { id: 6, name: "恋人たち (The Lovers)", symbol: "💖", yesScore: 95, reversedYesScore: 35, keyword: "調和・好意・最高の選択", icon: "fa-heart" },
-      { id: 7, name: "戦車 (The Chariot)", symbol: "🛞", yesScore: 85, reversedYesScore: 30, keyword: "勝利・突破・果敢な進軍", icon: "fa-shield-halved" },
-      { id: 8, name: "力 (Strength)", symbol: "🦁", yesScore: 75, reversedYesScore: 35, keyword: "忍耐・コントロール・愛の力", icon: "fa-hand-fist" },
-      { id: 9, name: "隠者 (The Hermit)", symbol: "🕯️", keyword: "内省・慎重・焦りは禁物", yesScore: 35, reversedYesScore: 20, icon: "fa-fire-flame-curved" },
-      { id: 10, name: "運命の輪 (Wheel of Fortune)", symbol: "🎡", yesScore: 98, reversedYesScore: 25, keyword: "大絶好機・最高の波・転機", icon: "fa-arrows-rotate" },
-      { id: 11, name: "正義 (Justice)", symbol: "⚖️", yesScore: 50, reversedYesScore: 30, keyword: "公平な判断・誠実さ・バランス", icon: "fa-scale-balanced" },
-      { id: 12, name: "吊るされた男 (The Hanged Man)", symbol: "🦇", yesScore: 20, reversedYesScore: 40, keyword: "試練・視点変更・一休止", icon: "fa-hourglass-half" },
-      { id: 13, name: "死神 (Death)", symbol: "🦋", yesScore: 10, reversedYesScore: 45, keyword: "リセット・再スタート・終焉", icon: "fa-skull" },
-      { id: 14, name: "節制 (Temperance)", symbol: "🍷", yesScore: 70, reversedYesScore: 40, keyword: "調和・自然体・焦らず調和", icon: "fa-glass-water" },
-      { id: 15, name: "悪魔 (The Devil)", symbol: "⛓️", yesScore: 15, reversedYesScore: 50, keyword: "執着・誘惑・見直しが必要", icon: "fa-link" },
-      { id: 16, name: "塔 (The Tower)", symbol: "⚡", yesScore: 5, reversedYesScore: 25, keyword: "電撃的変化・壊革・手放し", icon: "fa-bolt" },
-      { id: 17, name: "星 (The Star)", symbol: "⭐", yesScore: 90, reversedYesScore: 45, keyword: "希望・インスピレーション・叶う", icon: "fa-star" },
-      { id: 18, name: "月 (The Moon)", symbol: "🌙", yesScore: 20, reversedYesScore: 40, keyword: "不透明・不安・時間が解決", icon: "fa-moon" },
-      { id: 19, name: "太陽 (The Sun)", symbol: "☀️", yesScore: 100, reversedYesScore: 60, keyword: "大成功・祝福・大吉兆", icon: "fa-sun" },
-      { id: 20, name: "審判 (Judgement)", symbol: "📯", yesScore: 90, reversedYesScore: 35, keyword: "覚醒・チャンス再来・復活", icon: "fa-bell" },
-      { id: 21, name: "世界 (The World)", symbol: "🌍", yesScore: 100, reversedYesScore: 55, keyword: "完全成就・大団円・最高の答え", icon: "fa-globe" }
+      { id: 0, name: "愚者 (The Fool)", image: "00愚者.png", symbol: "🃏", yesScore: 75, reversedYesScore: 35, keyword: "自由・冒険・新たな挑戦", icon: "fa-feather" },
+      { id: 1, name: "魔術師 (The Magician)", image: "01魔術師.png", symbol: "🪄", yesScore: 90, reversedYesScore: 40, keyword: "才能開花・スタート・準備完了", icon: "fa-wand-magic" },
+      { id: 2, name: "女教皇 (The High Priestess)", image: "02女教皇.jpeg", symbol: "📜", yesScore: 45, reversedYesScore: 25, keyword: "静観・直感・慎重な観察", icon: "fa-book-open" },
+      { id: 3, name: "女帝 (The Empress)", image: "03女帝.jpeg", symbol: "👑", yesScore: 95, reversedYesScore: 50, keyword: "繁栄・愛・実り豊かさ", icon: "fa-crown" },
+      { id: 4, name: "皇帝 (The Emperor)", image: "04皇帝.jpeg", symbol: "🏛️", yesScore: 85, reversedYesScore: 30, keyword: "リーダーシップ・実行・達成", icon: "fa-chess-king" },
+      { id: 5, name: "法王 (The Hierophant)", image: "05教皇.jpeg", symbol: "⛪", yesScore: 70, reversedYesScore: 40, keyword: "信頼・伝統・アドバイス受容", icon: "fa-hands-praying" },
+      { id: 6, name: "恋人たち (The Lovers)", image: "06恋人.jpeg", symbol: "💖", yesScore: 95, reversedYesScore: 35, keyword: "調和・好意・最高の選択", icon: "fa-heart" },
+      { id: 7, name: "戦車 (The Chariot)", image: "07戦車.jpegg", symbol: "🛞", yesScore: 85, reversedYesScore: 30, keyword: "勝利・突破・果敢な進軍", icon: "fa-shield-halved" },
+      { id: 8, name: "力 (Strength)", image: "08力.jpeg", symbol: "🦁", yesScore: 75, reversedYesScore: 35, keyword: "忍耐・コントロール・愛の力", icon: "fa-hand-fist" },
+      { id: 9, name: "隠者 (The Hermit)", image: "09隠者.jpeg", symbol: "🕯️", keyword: "内省・慎重・焦りは禁物", yesScore: 35, reversedYesScore: 20, icon: "fa-fire-flame-curved" },
+      { id: 10, name: "運命の輪 (Wheel of Fortune)", image: "10運命の輪.jpeg", symbol: "🎡", yesScore: 98, reversedYesScore: 25, keyword: "大絶好機・最高の波・転機", icon: "fa-arrows-rotate" },
+      { id: 11, name: "正義 (Justice)", image: "11正義.jpeg", symbol: "⚖️", yesScore: 50, reversedYesScore: 30, keyword: "公平な判断・誠実さ・バランス", icon: "fa-scale-balanced" },
+      { id: 12, name: "吊るされた男 (The Hanged Man)", image: "12吊るされた男.jpeg", symbol: "🦇", yesScore: 20, reversedYesScore: 40, keyword: "試練・視点変更・一休止", icon: "fa-hourglass-half" },
+      { id: 13, name: "死神 (Death)", image: "13死神.jpeg", symbol: "🦋", yesScore: 10, reversedYesScore: 45, keyword: "リセット・再スタート・終焉", icon: "fa-skull" },
+      { id: 14, name: "節制 (Temperance)", image: "14節制.jpeg", symbol: "🍷", yesScore: 70, reversedYesScore: 40, keyword: "調和・自然体・焦らず調和", icon: "fa-glass-water" },
+      { id: 15, name: "悪魔 (The Devil)", image: "15悪魔.jpeg", symbol: "⛓️", yesScore: 15, reversedYesScore: 50, keyword: "執着・誘惑・見直しが必要", icon: "fa-link" },
+      { id: 16, name: "塔 (The Tower)", image: "16塔.jpeg16塔.jpeg", symbol: "⚡", yesScore: 5, reversedYesScore: 25, keyword: "電撃的変化・壊革・手放し", icon: "fa-bolt" },
+      { id: 17, name: "星 (The Star)", image: "17星.jpeg", symbol: "⭐", yesScore: 90, reversedYesScore: 45, keyword: "希望・インスピレーション・叶う", icon: "fa-star" },
+      { id: 18, name: "月 (The Moon)", image: "18月.jpeg", symbol: "🌙", yesScore: 20, reversedYesScore: 40, keyword: "不透明・不安・時間が解決", icon: "fa-moon" },
+      { id: 19, name: "太陽 (The Sun)", image: "19太陽.jpeg", symbol: "☀️", yesScore: 100, reversedYesScore: 60, keyword: "大成功・祝福・大吉兆", icon: "fa-sun" },
+      { id: 20, name: "審判 (Judgement)", image: "20審判.jpeg", symbol: "📯", yesScore: 90, reversedYesScore: 35, keyword: "覚醒・チャンス再来・復活", icon: "fa-bell" },
+      { id: 21, name: "世界 (The World)", image: "21世界.jpeg", symbol: "🌍", yesScore: 100, reversedYesScore: 55, keyword: "完全成就・大団円・最高の答え", icon: "fa-globe" }
     ];
 
-    // State Variables
     let selectedQuestion = "";
     let selectedCard = null;
-    let isAudioEnabled = false;
-    let audioContext = null;
-    let synthUtterance = null;
-    let apiKey = localStorage.getItem('tarot_cosmic_key') || '';
 
-    window.onload = function() {
-      initStarBackground();
-      if(apiKey) {
-        document.getElementById('userApiKey').value = apiKey;
-      }
-    };
-
-    function initStarBackground() {
-      const canvas = document.getElementById('stars-canvas');
-      const ctx = canvas.getContext('2d');
-      let width = canvas.width = window.innerWidth;
-      let height = canvas.height = window.innerHeight;
-
-      const stars = Array.from({ length: 120 }, () => ({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        size: Math.random() * 1.8,
-        alpha: Math.random(),
-        speed: 0.005 + Math.random() * 0.015
-      }));
-
-      function render() {
-        ctx.clearRect(0, 0, width, height);
-        stars.forEach(s => {
-          s.alpha += s.speed;
-          if(s.alpha > 1 || s.alpha < 0) s.speed = -s.speed;
-          ctx.fillStyle = `rgba(245, 158, 11, ${Math.abs(s.alpha) * 0.7})`;
-          ctx.beginPath();
-          ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-          ctx.fill();
-        });
-        requestAnimationFrame(render);
-      }
-      render();
-
-      window.onresize = () => {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-      };
-    }
-
-    // Audio Chime Logic
-    function toggleAudio() {
-      isAudioEnabled = !isAudioEnabled;
-      const soundIcon = document.getElementById('soundIcon');
-      const soundLabel = document.getElementById('soundLabel');
-
-      if(isAudioEnabled) {
-        if(!audioContext) {
-          audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        soundIcon.className = "fa-solid fa-volume-high text-amber-400 animate-pulse";
-        soundLabel.innerText = "Sound ON";
-        playCosmicChime(528, 0.4);
-      } else {
-        soundIcon.className = "fa-solid fa-volume-xmark text-purple-400";
-        soundLabel.innerText = "Sound OFF";
-      }
-    }
-
-    function playCosmicChime(freq = 528, duration = 1.0) {
-      if(!isAudioEnabled || !audioContext) return;
-      try {
-        const osc = audioContext.createOscillator();
-        const gain = audioContext.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, audioContext.currentTime);
-        gain.gain.setValueAtTime(0.15, audioContext.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioContext.destination);
-        osc.start();
-        osc.stop(audioContext.currentTime + duration);
-      } catch(e){}
-    }
-
-    // Presets Click Handler
-    function selectPreset(questionText) {
-      document.getElementById('userQuestion').value = questionText;
-      playCosmicChime(640, 0.3);
-      startTarotSession();
-    }
-
-    // STEP Navigation Logic
-    function startTarotSession() {
-      const inputQ = document.getElementById('userQuestion').value.trim();
-      selectedQuestion = inputQ || "今の私の問いに対するYES/NOの答え";
-
-      playCosmicChime(432, 1.0);
-      document.getElementById('setupSection').classList.add('hidden');
-      document.getElementById('shuffleSection').classList.remove('hidden');
-      document.getElementById('shuffleSection').classList.add('flex');
-
-      selectedCard = null;
-    }
-
-    // Interactive Card Draw Logic
-    function handleDeckClick() {
-      const deck = document.getElementById('cardDeckStack');
-      playCosmicChime(784, 0.5);
-
-      deck.classList.add('rotate-12', 'scale-105');
-      setTimeout(() => {
-        deck.classList.remove('rotate-12', 'scale-105');
-      }, 300);
-
-      if(!selectedCard) {
-        const randomCard = TAROT_CARDS[Math.floor(Math.random() * TAROT_CARDS.length)];
-        const isReversed = Math.random() < 0.35;
-        selectedCard = { ...randomCard, isReversed };
-
-        document.getElementById('shuffleStatusText').innerText = "✨ 運命のカードが選ばれました";
-        document.getElementById('shuffleStatusText').className = "text-sm font-sans text-amber-300 font-bold animate-bounce";
-        document.getElementById('drawCardsBtn').classList.remove('hidden');
-      }
-    }
-
-    function drawCards() {
-      playCosmicChime(880, 1.2);
-      document.getElementById('shuffleSection').classList.add('hidden');
-      document.getElementById('shuffleSection').classList.remove('flex');
-      document.getElementById('spreadDisplaySection').classList.remove('hidden');
-
-      renderCardGrid();
-    }
-
+    // 【修正ポイント2】 renderCardGrid() 内で <img> タグを使用してカード画像を表示します。
+    // ※ 万が一画像が存在しない場合は自動で絵文字に戻る onerror フォールバックを組み込んでいます。
     function renderCardGrid() {
       const grid = document.getElementById('cardsGrid');
       grid.innerHTML = '';
@@ -722,20 +441,24 @@
             <span class="text-xs font-sans text-purple-300/70">タップしてカードを開眼</span>
           </div>
           
-          <div class="card-back absolute inset-0 bg-cosmic-800 border-2 border-amber-400 rounded-2xl p-5 flex flex-col justify-between items-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900 via-cosmic-900 to-black">
+          <div class="card-back absolute inset-0 bg-cosmic-800 border-2 border-amber-400 rounded-2xl p-4 flex flex-col justify-between items-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900 via-cosmic-900 to-black">
             <div class="text-center">
               <span class="text-xs text-amber-400 font-sans tracking-widest uppercase block">Selected Card</span>
-              <h4 class="font-serif font-bold text-base text-amber-200 mt-1">${selectedCard.name}</h4>
-              <span class="text-xs px-2.5 py-0.5 rounded ${selectedCard.isReversed ? 'bg-rose-950/80 text-rose-300 border border-rose-500/30' : 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/30'} font-sans inline-block mt-1">
+              <h4 class="font-serif font-bold text-base text-amber-200 mt-0.5">${selectedCard.name}</h4>
+              <span class="text-[10px] px-2 py-0.5 rounded ${selectedCard.isReversed ? 'bg-rose-950/80 text-rose-300 border border-rose-500/30' : 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/30'} font-sans inline-block mt-0.5">
                 ${selectedCard.isReversed ? '逆位置 (Reversed)' : '正位置 (Upright)'}
               </span>
             </div>
-            <div class="my-3 text-center">
-              <div class="text-7xl filter drop-shadow-[0_0_20px_rgba(245,158,11,0.6)] ${selectedCard.isReversed ? 'rotate-180' : ''}">
-                ${selectedCard.symbol}
-              </div>
+
+            <!-- 画像表示部分：GitHubに置いた画像ファイルを表示 -->
+            <div class="my-2 text-center flex items-center justify-center h-44 w-full overflow-hidden">
+              <img src="${selectedCard.image}" 
+                   alt="${selectedCard.name}" 
+                   class="max-h-full max-w-full object-contain rounded-lg border border-amber-400/30 shadow-md ${selectedCard.isReversed ? 'rotate-180' : ''}" 
+                   onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-6xl filter drop-shadow-[0_0_20px_rgba(245,158,11,0.6)] ${selectedCard.isReversed ? 'rotate-180' : ''}\'>${selectedCard.symbol}</div>';">
             </div>
-            <div class="text-center w-full bg-cosmic-900/80 p-2.5 rounded-xl border border-purple-800/40">
+
+            <div class="text-center w-full bg-cosmic-900/80 p-2 rounded-xl border border-purple-800/40">
               <p class="text-xs font-sans text-amber-300/90 font-medium">${selectedCard.keyword}</p>
             </div>
           </div>
@@ -748,202 +471,79 @@
 
     function flipCard() {
       const cardInner = document.getElementById('cardInner');
-      if(!cardInner.classList.contains('card-flipped')) {
+      if(cardInner && !cardInner.classList.contains('card-flipped')) {
         cardInner.classList.add('card-flipped');
-        playCosmicChime(950, 0.6);
       }
     }
 
-    async function fetchCosmicReading() {
-      flipCard();
+    function selectPreset(q) {
+      document.getElementById('userQuestion').value = q;
+      startTarotSession();
+    }
 
+    function startTarotSession() {
+      const inputQ = document.getElementById('userQuestion').value.trim();
+      selectedQuestion = inputQ || "今の私の問いに対するYES/NOの答え";
+      document.getElementById('setupSection').classList.add('hidden');
+      document.getElementById('shuffleSection').classList.remove('hidden');
+      document.getElementById('shuffleSection').classList.add('flex');
+      selectedCard = null;
+    }
+
+    function handleDeckClick() {
+      if(!selectedCard) {
+        const randomCard = TAROT_CARDS[Math.floor(Math.random() * TAROT_CARDS.length)];
+        const isReversed = Math.random() < 0.35;
+        selectedCard = { ...randomCard, isReversed };
+        document.getElementById('shuffleStatusText').innerText = "✨ 運命のカードが選ばれました";
+        document.getElementById('drawCardsBtn').classList.remove('hidden');
+      }
+    }
+
+    function drawCards() {
+      document.getElementById('shuffleSection').classList.add('hidden');
+      document.getElementById('shuffleSection').classList.remove('flex');
+      document.getElementById('spreadDisplaySection').classList.remove('hidden');
+      renderCardGrid();
+    }
+
+    function fetchCosmicReading() {
+      flipCard();
       document.getElementById('spreadDisplaySection').classList.add('hidden');
       document.getElementById('readingResultSection').classList.remove('hidden');
-      document.getElementById('aiLoading').classList.remove('hidden');
-      document.getElementById('readingContent').classList.add('hidden');
-
       document.getElementById('resultQuestionHeader').innerText = `「${selectedQuestion}」`;
 
-      const systemPrompt = `あなたはタロット神託のYES/NO決断AI「TarotAP YES/NO Engine」です。
-ユーザーの質問に対し、引き当てられたカードの象徴とエネルギーから【YES / NO】の明確な判定とアドバイスを行ってください。
-
-必ず以下のJSONフォーマットで回答を返却してください:
-{
-  "verdict": "【YES】または【NO】または【条件付きYES】",
-  "yesProbability": 75, 
-  "verdictSummary": "判定理由の要約（80文字程度）",
-  "overallMessage": "全体の神託メッセージ（250文字程度で論理的かつ神秘的に）",
-  "actionAdvice": "今ユーザーが取るべき具体的な1〜2つのアクション",
-  "luckyItems": "運気を高める開運カラー・アイテム"
-}`;
-
-      const userPrompt = `質問内容: ${selectedQuestion}
-引いたカード: ${selectedCard.name} (${selectedCard.isReversed ? '逆位置' : '正位置'})
-カードのキーテーマ: ${selectedCard.keyword}`;
-
-      try {
-        const targetApiKey = apiKey || '';
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${targetApiKey}`;
-
-        const payload = {
-          contents: [{ parts: [{ text: userPrompt }] }],
-          systemInstruction: { parts: [{ text: systemPrompt }] },
-          generationConfig: { responseMimeType: "application/json" }
-        };
-
-        let resultData = null;
-
-        if(targetApiKey) {
-          const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          const resJson = await response.json();
-          const jsonText = resJson.candidates?.[0]?.content?.parts?.[0]?.text;
-          if(jsonText) {
-            resultData = JSON.parse(jsonText);
-          }
-        }
-
-        if(!resultData) {
-          resultData = generateFallbackReading(selectedCard, selectedQuestion);
-        }
-
-        displayReadingResults(resultData);
-
-      } catch (err) {
-        console.warn("TarotAP YES/NO Offline Mode activated.", err);
-        const fallback = generateFallbackReading(selectedCard, selectedQuestion);
-        displayReadingResults(fallback);
-      }
+      const fallbackData = generateFallbackReading(selectedCard, selectedQuestion);
+      displayReadingResults(fallbackData);
     }
 
-    // Display Interpretation Results & YES/NO Gauges
     function displayReadingResults(data) {
       document.getElementById('aiLoading').classList.add('hidden');
       document.getElementById('readingContent').classList.remove('hidden');
-
       const verdictBadge = document.getElementById('verdictBadge');
-      const yesProb = Math.min(100, Math.max(0, data.yesProbability || 50));
-      const noProb = 100 - yesProb;
-
-      // Styling Verdict Badge
-      if(data.verdict.includes('YES') && !data.verdict.includes('条件付き')) {
-        verdictBadge.innerText = "✨ YES（ポジティブ）";
-        verdictBadge.className = "inline-block px-8 py-3 rounded-full font-serif text-2xl md:text-3xl font-extrabold tracking-wider bg-emerald-950/80 text-emerald-300 border-emerald-400 shadow-emerald-900/50 shadow-2xl";
-      } else if(data.verdict.includes('NO')) {
-        verdictBadge.innerText = "⛔ NO（時期尚早・慎重）";
-        verdictBadge.className = "inline-block px-8 py-3 rounded-full font-serif text-2xl md:text-3xl font-extrabold tracking-wider bg-rose-950/80 text-rose-300 border-rose-400 shadow-rose-900/50 shadow-2xl";
-      } else {
-        verdictBadge.innerText = "⚖️ 条件付きYES（タイミング次第）";
-        verdictBadge.className = "inline-block px-8 py-3 rounded-full font-serif text-xl md:text-2xl font-extrabold tracking-wider bg-amber-950/80 text-amber-300 border-amber-400 shadow-amber-900/50 shadow-2xl";
-      }
-
-      document.getElementById('yesPercentText').innerText = yesProb;
-      document.getElementById('noPercentText').innerText = noProb;
       
-      setTimeout(() => {
-        document.getElementById('yesProgressBar').style.width = `${yesProb}%`;
-      }, 100);
+      verdictBadge.innerText = data.verdict;
+      verdictBadge.className = "inline-block px-8 py-3 rounded-full font-serif text-2xl md:text-3xl font-extrabold tracking-wider bg-emerald-950/80 text-emerald-300 border-emerald-400 shadow-emerald-900/50 shadow-2xl";
 
+      document.getElementById('yesPercentText').innerText = data.yesProbability;
+      document.getElementById('noPercentText').innerText = 100 - data.yesProbability;
+      document.getElementById('yesProgressBar').style.width = `${data.yesProbability}%`;
       document.getElementById('verdictSummary').innerText = data.verdictSummary;
       document.getElementById('overallText').innerText = data.overallMessage;
       document.getElementById('actionAdviceText').innerText = data.actionAdvice;
       document.getElementById('luckyItemsText').innerText = data.luckyItems;
-
-      playCosmicChime(600, 1.2);
     }
 
-    // High Precision Local Fallback YES/NO Generator
     function generateFallbackReading(card, question) {
       const calcYesScore = card.isReversed ? card.reversedYesScore : card.yesScore;
-      
-      let verdictStr = "【YES】";
-      if(calcYesScore >= 70) {
-        verdictStr = "【YES】";
-      } else if(calcYesScore <= 35) {
-        verdictStr = "【NO】";
-      } else {
-        verdictStr = "【条件付きYES】";
-      }
-
       return {
-        verdict: verdictStr,
+        verdict: calcYesScore >= 50 ? "✨ YES" : "⛔ NO",
         yesProbability: calcYesScore,
-        verdictSummary: `「${card.name}」が示す『${card.keyword}』の波長により、${calcYesScore}%の明確な兆候が現れています。`,
-        overallMessage: `ご質問「${question}」に対して展開された『${card.name} (${card.isReversed ? '逆位置' : '正位置'})』は、現在のエネルギーの流れを明確に象徴しています。\n\nカードの象徴する「${card.keyword}」は、焦らず着実に進むことで望む結果へと繋がることを促しています。無理に好転させようとせず、自身の内なる信念に従うことが開運への近道です。`,
-        actionAdvice: "選択を確固たるものにするために、まずは今日できる小さな一歩を具体的に行動へ移しましょう。",
-        luckyItems: "ラッキーカラー: ルビーゴールド / ラッキーアイテム: 柑橘系アロマ・ノート"
+        verdictSummary: `「${card.name}」が示す『${card.keyword}』のエネルギーが現れています。`,
+        overallMessage: `ご質問「${question}」に対し、『${card.name} (${card.isReversed ? '逆位置' : '正位置'})』が導き出されました。\n\n現在の状況は「${card.keyword}」のフェーズにあります。焦らず自身の直感と準備を信じて前進してください。`,
+        actionAdvice: "今日できる小さな一歩を具体的に選択・行動に移してみましょう。",
+        luckyItems: "ラッキーカラー: ルビーゴールド / ラッキーアイテム: アロマオイル"
       };
-    }
-
-    // TTS Voice Generator
-    function speakReading() {
-      const summary = document.getElementById('verdictSummary').innerText;
-      const text = document.getElementById('overallText').innerText;
-      const fullText = `${summary}。 ${text}`;
-
-      if('speechSynthesis' in window) {
-        if(window.speechSynthesis.speaking) {
-          window.speechSynthesis.cancel();
-          document.getElementById('speechBtnText').innerText = "音声で聴く";
-          return;
-        }
-
-        synthUtterance = new SpeechSynthesisUtterance(fullText);
-        synthUtterance.lang = 'ja-JP';
-        synthUtterance.rate = 0.95;
-
-        synthUtterance.onend = () => {
-          document.getElementById('speechBtnText').innerText = "音声で聴く";
-        };
-
-        window.speechSynthesis.speak(synthUtterance);
-        document.getElementById('speechBtnText').innerText = "停止する";
-      } else {
-        alert("お使いのブラウザは音声読み上げに対応していません。");
-      }
-    }
-
-    // Copy Result to Clipboard
-    function copyReadingResult() {
-      const verdict = document.getElementById('verdictBadge').innerText;
-      const yesP = document.getElementById('yesPercentText').innerText;
-      const text = `【TarotAP YES/NO タロット鑑定結果】\n質問: 「${selectedQuestion}」\n判定: ${verdict} (YES確率 ${yesP}%)\n\n■ 概要\n${document.getElementById('verdictSummary').innerText}\n\n■ 詳細アドバイス\n${document.getElementById('actionAdviceText').innerText}\n\n#TarotAP #タロット占い #YESNOタロット`;
-      
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-
-      playCosmicChime(1000, 0.3);
-      alert("鑑定結果をクリップボードにコピーしました！");
-    }
-
-    // Modal Control Functions
-    function openApiModal() {
-      document.getElementById('apiModal').classList.remove('hidden');
-    }
-    function closeApiModal() {
-      document.getElementById('apiModal').classList.add('hidden');
-    }
-    function saveApiKey() {
-      const val = document.getElementById('userApiKey').value.trim();
-      apiKey = val;
-      localStorage.setItem('tarot_cosmic_key', val);
-      closeApiModal();
-      playCosmicChime(700, 0.4);
-      alert("TarotAP Engine APIキーを保存しました。");
-    }
-
-    function openModal(id) {
-      document.getElementById(id).classList.remove('hidden');
-    }
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
     }
 
     function resetApp() {
